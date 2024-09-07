@@ -1,0 +1,389 @@
+---
+title: "CCLasso vs SparCC"
+author: "Avril Metcalfe-Roach"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+CCLasso and SparCC are two correlation matrix-based network analysis methods.
+They use similar approaches, but CCLasso is a newer method that addresses some
+of the limitations of SparCC, helping to limit spurious correlations. CCLasso
+also provides P values, whereas SparCC doesn't (they can be estimated via
+permutation testing, but this isn't straightforward or necessarily common).
+
+Here are the CCLasso and SparCC functions:
+<https://github.com/huayingfang/CCLasso>
+
+And the paper that compares the methods:
+<https://academic.oup.com/bioinformatics/article/31/19/3172/211784>
+
+# 1. Preparation
+
+CCLasso does not have its own package - we just have to download the functions
+for CCLasso and SparCC and then source them so they can be used. We will
+download them to our Networks folder for easy use.
+
+```{r Installation, echo=T, results='hide'}
+#download.file('https://raw.githubusercontent.com/huayingfang/CCLasso/master/R/SparCC.R',
+#               'Networks/SparCC_function.R')
+# download.file('https://raw.githubusercontent.com/huayingfang/CCLasso/master/R/cclasso.R',
+#               'Networks/CCLasso_function.R')
+```
+
+We will then load the necessary packages and functions.
+
+```{r Load_functions, echo=T, message=FALSE, warning=FALSE, results='hide'}
+library(tidyverse)
+library(gtools) # Necessary for the network functions
+library(pheatmap) # For visualization
+library(gridExtra) # To arrange the visualizations
+library(igraph) # For network building
+
+# Network functions
+source("CCLasso_function.R")
+source("SparCC_function.R")
+```
+
+# 2. Load data
+
+We will use two sets of data:
+
+-   Dummy microbiome data (zero-inflated, approximate negative binomial
+    distribution)
+
+    -   This will only be tested as counts, as relative abundance is confounded
+        by the compositional nature of the data. The algorithms will
+        automatically apply a normalization procedure to the count data.
+
+-   Control data (logistic normal data)
+
+    -   This will be tested as both counts and relative abundance.
+
+Importantly, the control data should not contain any correlations between
+features, whereas the microbiome data should show correlations between
+commonly-associated taxa.
+
+To create the control data, we can run the following code:
+
+```{r Create_ctrl_data}
+set.seed(421)
+
+# Parameters
+n <- 100 # samples
+p <- 20 # features
+x <- matrix(rnorm(n * p), nrow = n) # normal distribution
+totCount <- round(runif(n = n,  min = 1000, max = 2000)) # Fake total counts
+
+# Create datasets
+ctrlfrac <- exp(x) / rowSums(exp((x))) # logistic and RELATIVE abundance
+ctrl <- ctrlfrac * totCount # Create the dummy COUNT data
+
+# Add COLUMN/ROW names
+samples = paste('Sample_',c(1:n),sep='')
+features = paste('Feature_',c(1:p),sep='')
+ctrlfrac = as.data.frame(ctrlfrac) %>% `colnames<-`(features) %>% `rownames<-`(samples)
+ctrl = as.data.frame(ctrl) %>% `colnames<-`(features) %>% `rownames<-`(samples)
+
+# Remove temp variables
+rm(features,n,p,samples,totCount,x)
+```
+
+We will then also load the microbiome data, which also has 100 samples:
+
+```{r Load_microbiome_data}
+df = read.csv('sample_otus_genus.csv',row.names = 1) %>% t() %>% as.data.frame()
+# Edit names so that _unclassified becomes _unc
+colnames(df) = sapply(colnames(df), function(x) str_replace(x,'_unclassified','_unc'))
+```
+
+In the CCLasso paper, they test their method using Human Microbiome Project
+data. Before they build their network, they filter the taxa to include only the
+OTUs that meet the following requirements:
+
+-   Mean reads \> 2 across all samples
+
+-   Less than 60% zeros across all samples
+
+We will therefore write a function to filter the datasets.
+
+```{r OTU_filtration}
+filter_otus = function(data, cols_are_otus = T, min_reads = 2, max_zeros = 0.6){
+  if(cols_are_otus==F){
+    data = t(data) %>% as.data.frame()
+  }   
+  data = data[,colMeans(data) >= min_reads] # Only include taxa with at least 2 avg reads   
+  pct = (data == 0) %>% colSums() # Number of samples with 0 reads
+  data = data[,pct/nrow(data) < max_zeros] # Only taxa where the fraction of zeros is less than 60%
+  if(cols_are_otus==F){
+    data = t(data) %>% as.data.frame()
+  }
+  return(data) 
+}
+```
+
+This function is then applied to all count datasets. The relative abundance
+dataset will use the count dataset for filtration, since the mean reads won't
+work on proportional data.
+
+```{r Filter_datasets}
+df = filter_otus(df)
+ctrl = filter_otus(ctrl)
+ctrlfrac = ctrlfrac %>% select(all_of(names(ctrl)))
+```
+
+# 3. Run SparCC and CCLasso
+
+## Run algorithms
+
+SparCC is the older version of the algorithm (2012). Different functions are
+applied depending on whether the data are counts or relative abundance.
+
+```{r SparCC}
+sparcc_count_df <- SparCC.count(x = df)
+sparcc_count_ctrl <- SparCC.count(x = ctrl)
+sparcc_frac_ctrl <- SparCC.frac(x = ctrlfrac)
+```
+
+CCLasso is the newer version of the algorithm (2015). The data type is input as
+a parameter.
+
+```{r CCLasso, echo=T, results='hide'}
+cclasso_count_df <- cclasso(x = df, counts = T)
+cclasso_count_ctrl <- cclasso(x = ctrl, counts = T)
+cclasso_frac_ctrl <- cclasso(x = ctrlfrac, counts = F)
+```
+
+## Extract correlation matrices and P values
+
+The correlation matrix for CCLasso is stored as cor_w, and cor.w for SparCC. We
+will also add the feature names back to the matrices to allow interpretation.
+
+```{r Correlation_matrices}
+mat_cclasso_count_df = cclasso_count_df$cor_w %>% `colnames<-`(colnames(df)) %>% `rownames<-`(colnames(df))
+mat_cclasso_count_ctrl = cclasso_count_ctrl$cor_w %>% `colnames<-`(colnames(ctrl)) %>% `rownames<-`(colnames(ctrl))
+mat_cclasso_frac_ctrl = cclasso_frac_ctrl$cor_w %>% `colnames<-`(colnames(ctrl)) %>% `rownames<-`(colnames(ctrl))
+
+mat_sparcc_count_df = sparcc_count_df$cor.w %>% `colnames<-`(colnames(df)) %>% `rownames<-`(colnames(df))
+mat_sparcc_count_ctrl = sparcc_count_ctrl$cor.w %>% `colnames<-`(colnames(ctrl)) %>% `rownames<-`(colnames(ctrl))
+mat_sparcc_frac_ctrl = sparcc_frac_ctrl$cor.w %>% `colnames<-`(colnames(ctrl)) %>% `rownames<-`(colnames(ctrl))
+```
+
+P values are only available for CCLasso. This is stored under p_vals. We will
+transform the data so that any P value \< 0.05 will be presented as an asterisk.
+We will use the Unicode "\U273B" instead of \* so that it's vertically centered.
+
+We'll only use the microbiome P values (see further below).
+
+```{r Prep_pvals_for_plot}
+# Microbiome
+cclasso_count_df_pval = cclasso_count_df$p_vals 
+cclasso_count_df_pval[cclasso_count_df_pval<0.05] = '\U273B'
+cclasso_count_df_pval[cclasso_count_df_pval!='\U273B'] = ''
+```
+
+# 4. Visualize the results
+
+## 4a. Heatmaps
+
+### Compare Data vs Ctrl, Counts vs Rel Ab, CCLasso vs SparCC
+
+We will create heatmaps of the correlations, where the colour indicates the
+coefficient of correlation. When we use pheatmap to make the plots, the grob can
+be accessed as plot[[4]]. We can use grid.arrange from gridExtra to plot them
+side by side (since they're not ggplot objects, we can't use more typical
+arranging functions such as facet_wrap).
+
+For now, we won't add P values.
+
+```{r Heatmap_function}
+# Function to make it tidier and more reproducible
+make_plot = function(mat,title, # matrix and plot title
+                     cols = F, rows = F, # Names of features
+                     tree_r = 0, tree_c = 0, # Dendrogram (set to 0 if unwanted)
+                     pvals=NULL,pvals_size=8){ # P value matrix and font size
+  # graphics.off()
+  if(is.matrix(pvals)){ # For CCLasso - pvals available
+    p=pheatmap(mat, main = title, legend = TRUE,
+           show_colnames = cols, show_rownames = rows,
+           treeheight_row=tree_r, treeheight_col = tree_c, 
+           display_numbers = pvals,
+           fontsize_number = pvals_size,
+           fontsize_row=6,fontsize_col = 6)
+  #graphics.off()
+  } else { # No pvals for SparCC
+    p=pheatmap(mat, main = title, legend = TRUE,
+             show_colnames = cols, show_rownames = rows,
+             treeheight_row=tree_r, treeheight_col = tree_c,
+             fontsize_row=6,fontsize_col = 6)
+    #graphics.off()
+  }
+  return(p)
+}
+```
+
+```{r Run_plot_function, echo=T, results='hide', fig.show='hide'}
+p1 = make_plot(mat_cclasso_count_df,title='CCLasso - Data - Count')[[4]]
+p2 = make_plot(mat_cclasso_count_ctrl,title='CCLasso - Ctrl - Count')[[4]]
+p3 = make_plot(mat_cclasso_frac_ctrl,title='CCLasso - Ctrl - Fraction')[[4]]
+p4 = make_plot(mat_sparcc_count_df,title='SparCC - Data - Count')[[4]]
+p5 = make_plot(mat_sparcc_count_ctrl,title='SparCC - Ctrl - Count')[[4]]
+p6 = make_plot(mat_sparcc_frac_ctrl,title='SparCC - Ctrl - Fraction')[[4]]
+```
+
+```{r Make_plots, fig.width=10}
+grid.arrange(arrangeGrob(grobs = list(p1,p2,p3,p4,p5,p6), nrow=2, ncol=3))
+```
+
+We can see that the CCLasso algorithm does a better job in removing spurious
+correlations, as there are no detected correlations in the control data.
+
+Let's focus on the microbiome data and add more information: p values (CCLasso
+only), dendrograms, and feature labels.
+
+```{r Make_detailed_plots, echo=T, results='hide', fig.show='hide'}
+p11 = make_plot(mat_cclasso_count_df,title='CCLasso', cols = T, rows = T,
+            tree_r = 0, tree_c = 5,
+            pvals = cclasso_count_df_pval)[[4]]
+p44 = make_plot(mat_sparcc_count_df,title='SparCC',cols = T, rows = T,
+            tree_r = 0, tree_c = 5)[[4]]
+```
+
+```{r Detailed_plots, fig.width=10}
+grid.arrange(arrangeGrob(grobs = list(p11,p44), nrow=1, ncol=2))
+```
+
+## 4b. Network Diagrams
+
+Let's visualize these data using edges (correlations) and nodes (the features).
+We can use the igraph package for this.
+
+First we need to build a data frame that contains all of our significant
+pairwise connections. Then we add some attributes and plot the network. Here we
+will colour our nodes according to the direction of association (negative=red,
+positive=blue) and will set the width of the lines relative to the absolute
+value of the correlation coefficient.
+
+Because SparCC doesn't give P values, we'll instead use a correlation
+coefficient cutoff.
+
+\*Note: the igraph is limited in terms of the plot parameters. For better
+control, it may be worth using ggplot2 in some cases.
+
+```{r Build_networks}
+
+# CCLasso
+
+# Extract the correlation matrix. We don't want duplicates or the diagonal.
+nw_cclasso = mat_cclasso_count_df
+nw_cclasso[!upper.tri(nw_cclasso)] <- NA
+# Pivot the table so that we have all possible pairs and filter out the NAs.
+nw_cclasso = nw_cclasso %>% as.data.frame() %>% 
+  rownames_to_column('Feature_A') %>% 
+  pivot_longer(cols = -Feature_A, names_to = 'Feature_B', values_to = 'corr') %>% 
+  filter(!is.na(corr)) %>% 
+  mutate(weight = 10*abs(corr), # line thickness
+         direction = ifelse(corr<0,'Red','Blue'))
+
+# Repeat with the P value data frame and join them together.
+nw_cclasso_p = cclasso_count_df$p_vals %>% 
+  `colnames<-`(colnames(df)) %>% `rownames<-`(colnames(df))
+nw_cclasso_p[!upper.tri(nw_cclasso_p)] <- NA
+nw_cclasso_p = nw_cclasso_p %>% as.data.frame() %>% 
+  rownames_to_column('Feature_A') %>% 
+  pivot_longer(cols = -Feature_A, names_to = 'Feature_B', values_to = 'pval') %>% 
+  filter(!is.na(pval))
+
+nw_cclasso = left_join(nw_cclasso,nw_cclasso_p)
+
+# Filter so that we only have connections that pass our P value threshold.
+p_threshold = 0.05
+nw_cclasso_filt = nw_cclasso %>% filter(pval<p_threshold)
+
+# Create graph elements
+g_cclasso = graph_from_data_frame(nw_cclasso_filt, directed = F)
+E(g_cclasso)$color = E(g_cclasso)$direction
+E(g_cclasso)$width = E(g_cclasso)$weight
+V(g_cclasso)$color <- "black"
+layout <- layout_with_fr(g_cclasso)
+layout <- norm_coords(layout, -1, 1, -1, 1)
+
+# SparCC ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Extract the correlation matrix. We don't want duplicates or the diagonal.
+nw_sparcc = mat_sparcc_count_df
+nw_sparcc[!upper.tri(nw_sparcc)] <- NA
+# Pivot the table so that we have all possible pairs and filter out the NAs.
+nw_sparcc = nw_sparcc %>% as.data.frame() %>% 
+  rownames_to_column('Feature_A') %>% 
+  pivot_longer(cols = -Feature_A, names_to = 'Feature_B', values_to = 'corr') %>% 
+  filter(!is.na(corr)) %>% 
+  mutate(weight = 10*abs(corr), # line thickness
+         direction = ifelse(corr<0,'Red','Blue'))
+
+# For this tutorial, we'll use a histogram to determine what a reasonable coefficient cutoff might be.
+# We don't want to be too stringent - otherwise our network will be too sparse.
+# 0.2 gives us approximately as many hits as with CCLasso, so we'll use that.
+hist(abs(nw_sparcc$corr))
+table(abs(nw_sparcc$corr)>0.2)
+
+nw_sparcc_filt = nw_sparcc %>% filter(abs(corr)>0.2)
+
+# Create graph
+g_sparcc = graph_from_data_frame(nw_sparcc_filt, directed = F)
+E(g_sparcc)$color = E(g_sparcc)$direction
+E(g_sparcc)$width = E(g_sparcc)$weight
+V(g_sparcc)$color <- "black"
+
+
+# Plot both networks ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+layout <- layout_with_fr(g_cclasso)
+layout <- norm_coords(layout, -1, 1, -1, 1)
+plot(g_cclasso, layout = layout, main = 'CCLasso',
+     vertex.size = 5, 
+     vertex.label.cex = 1,   # Adjust label size
+     vertex.label.color = "black",
+     vertex.color = V(g_cclasso)$color,  # Set vertex color to black
+     vertex.label.dist = 2, 
+     edge.arrow.size = 0.5,
+     asp = -1)  # Adjust aspect ratio
+
+layout <- layout_with_fr(g_sparcc)
+layout <- norm_coords(layout, -1, 1, -1, 1)
+plot(g_sparcc, layout = layout, main = 'SparCC',
+     vertex.size = 5, 
+     vertex.label.cex = 1,   # Adjust label size
+     vertex.label.color = "black",
+     vertex.color = V(g_sparcc)$color,  # Set vertex color to black
+     vertex.label.dist = 2, 
+     edge.arrow.size = 0.5,
+     asp = -1)  # Adjust aspect ratio
+```
+
+# 5. Compare methods
+
+In order to increase the robustness of the network analysis, it is recommended
+to run multiple network methods. This ensures that connections are not due to
+the limitations of any one method. Ideally the methods being compared should use
+different underlying algorithms, but for our purposes we will compare SparCC and
+CCLasso.
+
+We will only consider connections deemed significant. We will then combine the
+two methods into one table and identify the shared features.
+
+```{r}
+nw_all = nw_cclasso_filt %>% mutate(method='CCLasso',.before="Feature_A") %>% 
+  select(method,Feature_A, Feature_B, corr,direction) %>% 
+  rbind(
+    nw_sparcc_filt %>% mutate(method='SparCC',.before="Feature_A") %>%
+      select(method,Feature_A, Feature_B, corr,direction)
+    ) %>% 
+  pivot_wider(names_from = method, values_from = c('corr','direction')) %>% 
+  # Now we will annotate the results to see how much overlap there is.
+  mutate(both_sig = !(is.na(corr_CCLasso) | is.na(corr_SparCC))) %>% 
+  mutate(same_dir = both_sig & direction_CCLasso==direction_SparCC) %>% 
+  mutate(significant = both_sig & same_dir)
+
+# Features significant in both tools:
+table(Significant = nw_all$significant)
+# Very good - about 70% of the features remained significant.
+```
