@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo=T, message=FALSE, warning=FALSE, results='hide')
 
 # Download FastQ Reads to Compute Canada
 
-## 1. Choosing a compute cluster
+## Choosing a compute cluster
 
 Compute Canada has a variety of clusters to choose from, all with varying
 parameters. Parameters include internet access on the computational nodes, the
@@ -49,7 +49,7 @@ it may be worth downloading the files on Cedar etc. using a script and then
 transferring them afterward. That way your computer doesn’t have to stay
 connected to the server for the entire download.
 
-## 2. Recommended Method: SRA Toolkit
+## Recommended Method: SRA Toolkit
 
 This method works for all file sizes, does not require new installations, and is
 reasonably fast.
@@ -72,4 +72,40 @@ module load sra-toolkit/3.0.9
 esearch -db sra -query $project | efetch -format runinfo > runinfo.csv
 cat runinfo.csv | cut -d "," -f 1 > SRR.numbers
 cat SRR.numbers | parallel fastq-dump --split-files --origfmt --gzip {}
+```
+
+Check that you have the correct number of files afterward by running
+`ls -1 /path/to/directory | wc -l`. It seems to skip files quite often for some
+reason. Remember that there will be **two files for each sample** (forward and
+reverse reads).
+
+If it doesn’t download all the files, create a filtered version of SRR.numbers
+and rerun the command on the missing samples:
+
+```{bash}
+# List of successful files
+ls *.fastq.gz | sed 's/_.*//g' | sort | uniq > existing_accession_codes.txt
+# Filter the original list to include accessions that aren't in the above list
+grep -v -F -f existing_accession_codes.txt SRR.numbers > filtered_accession_list.txt
+# Then rerun the code
+module load sra-toolkit/3.0.9 # This must be run every time CC restarts
+cat filtered_accession_list.txt | parallel fastq-dump --split-files --origfmt --gzip {}
+```
+
+### **Optional: Move forward reads into a separate folder**
+
+Many programs (such as MetaPhlAn) only use the forward reads, and so it is often
+convenient to divide the reads into separate folders.
+
+```{bash}
+# Navigate to your sequences folder
+cd scratch/path/to/sequences
+
+# Create forward and reverse directories
+mkdir fwd_reads
+mkdir rev_reads
+
+# Bin the reads
+mv *_1.fastq.gz fwd_reads
+mv *_2.fastq.gz rev_reads
 ```
