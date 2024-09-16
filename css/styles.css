@@ -70,6 +70,7 @@ header a {
 
 header a:hover {
   color: #1e90ff;  /* Bright blue hover */
+  text-decoration: none !important;
 }
 
 .content {
