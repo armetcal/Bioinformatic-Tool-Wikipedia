@@ -1,7 +1,4 @@
 ---
-title: "download_reads_with_ebi"
-author: "Avril Metcalfe-Roach"
-date: "`r Sys.Date()`"
 output: html_document
 ---
 
