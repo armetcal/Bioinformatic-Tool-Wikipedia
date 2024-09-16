@@ -6,10 +6,10 @@ otherwise noted (DOI: 10.1093/bib/bbaa005).
 Network analysis tools are designed to identify pairwise relationships between
 features. There are two common quantitative approaches:
 
-| Approach                | Common Algorithms             | Use                                                                                                                                                                      |
-|-------------------------|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| (Dis)similarity indices | Bray-Curtis, Kullback-Leibler | Differences in two taxa over multiple samples. Anything that significantly interacts is used as a link to build the network.                                             |
-| Correlation matrices    | Pearson, Spearman             | Positive correlations can imply cross-feeding or co-aggregation between microbial taxa, while negative correlations can imply mutual exclusion or niche differentiation. |
+| Approach                 | Common Algorithms               | Use                                                                                                                                                                      |
+|--------------------------|---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| (Dis) similarity indices | Br ay-Curtis, Kullba ck-Leibler | Differences in two taxa over multiple samples. Anything that significantly interacts is used as a link to build the network.                                             |
+| C orrelation matrices    | Pearson, Spearman               | Positive correlations can imply cross-feeding or co-aggregation between microbial taxa, while negative correlations can imply mutual exclusion or niche differentiation. |
 
 ## Limitations
 

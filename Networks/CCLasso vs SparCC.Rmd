@@ -359,7 +359,151 @@ plot(g_sparcc, layout = layout, main = 'SparCC',
      asp = -1)  # Adjust aspect ratio
 ```
 
-# 5. Compare methods
+# 5. Apply Statistics
+
+Summary statistics can be applied to the networks to identify overarching
+features. These statistics can be prepared using the igraphs package. We'll use
+the unfiltered network data so that we can represent all the data.
+
+## 5.0 Data Prep
+
+First we'll need to transform the weights. Correlation values with larger
+magnitudes indicate that they are more closely correlated, so we need to reverse
+this. Mixing positive and negative values can also be tricky to incorporate into
+shortest distance calculations. We will deal with this by taking the absolute
+value of the correlation - in other words, we're just looking for strong
+interactions, positive or negative. We also need to remove all nonsignificant
+correlations, but leave the microbes intact so that they can be represented.
+These correlations will be assigned a weight of infinity (not connected).
+
+We'll make another version that doesn't include non-infinite distances for
+things like betweenness centrality.
+
+We'll then turn it into graph format as we did above. These will be our inputs
+further below.
+
+```{r Prep_data_filt}
+g_sparcc_filt = graph_from_data_frame(
+  nw_sparcc_filt %>% 
+  # Reverse the weights - now the larger values indicate further distance.
+  # Note: the 1-x ONLY works because the corr values are all less than 1
+  # i.e. they're similar to Pearson, Spearman coefficients
+  mutate(weight = 1-abs(corr)) %>% 
+  # Change anything nonsignificant to infinity distance
+  mutate(weight = ifelse(abs(corr)<0.2,Inf,weight)) %>% 
+    filter(!is.infinite(weight)), 
+  directed = F)
+E(g_sparcc_filt)$weight = E(g_sparcc_filt)$weight
+g_cclasso_filt = graph_from_data_frame(
+  nw_cclasso_filt %>% 
+  # Reverse the weights - now the larger values indicate further distance.
+  # Note: the 1-x ONLY works because the corr values are all less than 1
+  # i.e. they're similar to Pearson, Spearman coefficients
+  mutate(weight = 1-abs(corr)) %>% 
+  # Change anything nonsignificant to infinity distance
+  mutate(weight = ifelse(pval>=0.05,Inf,weight)) %>% 
+    filter(!is.infinite(weight)), 
+  directed = F)
+E(g_cclasso_filt)$weight = E(g_cclasso_filt)$weight
+```
+
+```{r Prep_data_unfilt}
+g_sparcc_unfilt = graph_from_data_frame(
+  nw_sparcc %>% 
+  # Reverse the weights - now the larger values indicate further distance.
+  # Note: the 1-x ONLY works because the corr values are all less than 1
+  # i.e. they're similar to Pearson, Spearman coefficients
+  mutate(weight = 1-abs(corr)) %>% 
+  # Change anything nonsignificant to infinity distance
+  mutate(weight = ifelse(abs(corr)<0.2,Inf,weight)),
+  directed = F)
+E(g_sparcc_unfilt)$weight = E(g_sparcc_unfilt)$weight
+g_cclasso_unfilt = graph_from_data_frame(
+  nw_cclasso %>% 
+  # Reverse the weights - now the larger values indicate further distance.
+  # Note: the 1-x ONLY works because the corr values are all less than 1
+  # i.e. they're similar to Pearson, Spearman coefficients
+  mutate(weight = 1-abs(corr)) %>% 
+  # Change anything nonsignificant to infinity distance
+  mutate(weight = ifelse(pval>=0.05,Inf,weight)),
+  directed = F)
+E(g_cclasso_unfilt)$weight = E(g_cclasso_unfilt)$weight
+```
+
+## 5a. Shortest distances
+
+Shortest distances tell us how closely two nodes are connected within a network.
+
+```{r Shortest_distance}
+# 0 distance means that it's the same node.
+# Infinite distance means that they're not connected by any path. This will change if you change the significance level.
+# Since infinite values are often problematic for plotting and statistics, it can be helpful to assign them some value that is larger than the largest non-infinite value.
+# infinite_factor = 1.5 means that infinite values will become 1.5x the largest non-infinite value. Nonparametric tests will likely be needed.
+run_dist = function(graph, infinite_factor = 1.5){
+  dist = distances( # Calculate distances (weighted by default)
+    graph,
+    mode = "all",
+    algorithm = "automatic"
+  ) %>% 
+    # Then format nicely
+    as.data.frame %>% rownames_to_column('From') %>% 
+    pivot_longer(cols = -From, names_to = 'To', values_to = 'Distance') %>% 
+    # Infinite distances mean that the two nodes are not connected via the network.
+    mutate(Connected = ifelse(is.infinite(Distance),'No','Yes'),
+           Comparison = paste0(From,':',To)) %>% 
+    # Remove self associations
+    filter(Distance !=0) %>%
+    # Round the values to facilitate removing duplicates
+    mutate(Distance = signif(Distance, 4)) %>% 
+    # Initialize 'connection' column for next bit of code
+    mutate(connection = NA)
+  
+  # The distances contain duplicates (From-To vs To-From).
+  # These will now be removed.
+  # NOTE: sometimes you might not want to remove them - if you're looking at a specific subset, it's easier to just filter one column.
+  # Sort each pair of taxa alphabetically.
+  for(i in 1:nrow(dist)){
+    # i=2
+    s = sort(c(dist$From[i],dist$To[i]))
+    dist$connection[i] = paste(s[1],s[2],sep="__")
+  }
+  # Remove duplicate reads
+  dist = dist %>% dplyr::select(Distance,Connected,connection) %>% unique()
+  
+  # Change infinite distances to a numerical value.
+  infval = max(dist$Distance[!is.infinite(dist$Distance)],na.rm=T)*infinite_factor
+  dist.noinf = dist %>% mutate(Distance = ifelse(is.infinite(Distance),infval,Distance))
+  
+  return(dist.noinf)
+}
+
+dist_cclasso = run_dist(g_cclasso_unfilt)
+dist_sparcc = run_dist(g_sparcc_unfilt)
+```
+
+## 5b. Betweenness Centrality
+
+```{r}
+bw_cclasso = betweenness(
+  g_cclasso_filt,
+  v = V(g_cclasso_filt),
+  directed = F,
+  cutoff = -1
+) %>% as.data.frame() %>% 
+  `names<-`('Betweenness') %>% 
+  rownames_to_column('Feature')
+
+bw_sparcc = betweenness(
+  g_sparcc_filt,
+  v = V(g_sparcc_filt),
+  directed = F,
+  cutoff = -1
+) %>% as.data.frame() %>% 
+  `names<-`('Betweenness') %>% 
+  rownames_to_column('Feature')
+```
+
+# 6. Compare methods
 
 In order to increase the robustness of the network analysis, it is recommended
 to run multiple network methods. This ensures that connections are not due to
