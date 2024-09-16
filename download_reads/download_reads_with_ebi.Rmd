@@ -1,0 +1,40 @@
+---
+title: "download_reads_with_ebi"
+author: "Avril Metcalfe-Roach"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=T, message=FALSE, warning=FALSE, results='hide')
+```
+
+# Download FastQ Reads to Compute Canada
+
+## 1. Choosing a compute cluster
+
+Compute Canada has a variety of clusters to choose from, all with varying
+parameters. Parameters include internet access on the computational nodes, the
+amount of resources that can be requested, etc.
+
+Dowloading reads can take a very long time, depending on the files, and
+therefore it is often convenient to submit a job rather than perform the
+download interactively (line by line in the console).
+
+**This protocol will work best on clusters whose job nodes have internet access,
+such as Cedar** – otherwise you will have to run the commands manually (without
+a .sh script) or use a different workaround. This was troubleshot on **Beluga**,
+which doesn’t have internet access, and it worked well. **Graham** is not
+straightforward as the job nodes don’t have internet access, but the RAM
+available in the login nodes is inadequate.
+
+You can transfer data between clusters using the Globus utility tool, so if your
+downstream tools are installed on a cluster without internet access, it may be
+worth downloading the files on Cedar etc. using a script and then transferring
+them afterward. That way your computer doesn’t have to stay connected to the
+server for the entire download.
+
+Different clusters have different ways they want you to download data. For
+Beluga, we can see from the wiki
+(<https://docs.alliancecan.ca/wiki/B%C3%A9luga/en>) that they want us to use the
+login (default) node to download files, as the node name is the same:

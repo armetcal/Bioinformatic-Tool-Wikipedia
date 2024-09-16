@@ -35,6 +35,11 @@ li a {
   padding: 8px;
 }
 
+li aindent {
+  display: block;
+  padding-left: 30px;
+}
+
 header {
     display: flex;
     justify-content: space-between;
@@ -68,7 +73,18 @@ header a {
   font-size: 17px;
 }
 
+header aindent {
+  text-decoration: none !important;
+  color: #ffffff;
+  font-size: 17px;
+}
+
 header a:hover {
+  color: #1e90ff;  /* Bright blue hover */
+  text-decoration: none !important;
+}
+
+header aindent:hover {
   color: #1e90ff;  /* Bright blue hover */
   text-decoration: none !important;
 }
