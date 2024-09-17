@@ -136,7 +136,7 @@ home directory).
 
 Optional Aspera installation:
 
-```{bash}
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
 # This version still works with sra-explorer.info.
 wget https://ak-delivery04-mul.dhe.ibm.com/sar/CMA/OSA/0adrj/0/ibm-aspera-connect_4.1.3.93_linux.tar.gz
 tar zxvf ibm-aspera-connect_4.1.3.93_linux.tar.gz
@@ -158,7 +158,7 @@ PRJEB17784 will result in one forward and one reverse read being downloaded for
 each sample, nested as follows:
 `path_to_folder/reads_fastq/PRJEB17784/ERR1912946`.
 
-```{bash}
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
 mkdir scratch/my_project
 java -jar ena-file-downloader.jar
 ```
