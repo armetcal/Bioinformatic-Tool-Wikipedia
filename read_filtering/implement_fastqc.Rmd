@@ -1,0 +1,54 @@
+---
+output: html_document
+---
+
+# Check Read Quality With FastQC and MultiQC
+
+FastQC is a desktop application that can be used to visually inspect the quality
+of reads stored in fastq files. However, it can also be run via the command
+line, where it outputs an HTML file with summary statistics.
+
+The website can be found [here](https://www.bioinformatics.babraham.ac.uk);
+however, it is pre-installed on Compute Canada and does not need to be
+separately downloaded. The tool is very modifiable, so read the documentation if
+any modifications are desired. The documentation also describes the
+interpretation in detail.
+
+However, the major downside of FastQC is that each output file must be
+individually inspected. Instead, we can use MultiQC, which analyzes all files
+and outputs a single HTML document, making it much more convenient for
+high-throughput projects. This tool is not pre-installed on Compute Canada.
+
+## Implementing FastQC
+
+FastQC is designed to be run on fastq files. The implementation is very simple:
+we simply load the FastQC module, make a list of all our fastq files, and then
+feed them to the `fastqc` command.
+
+--outdir will be used to save all of our fastqc outputs into a separate folder.
+
+Update the module versions as needed - use `module spider FastQC` to see the
+available versions.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+# Create an output folder
+mkdir FastQC
+# Load FastQC and its dependencies - update versions as needed.
+module load StdEnv/2023 fastqc/0.12.1
+# Run FastQC on all forward read files
+parallel fastqc --outdir=FastQC ::: *_1.fastq.gz
+```
+
+There are two outputs per fastq file: an HTML summary and a zipped file
+containing all the plots in the HTML summary.
+
+![](fastqc_html.JPG)
+
+## Implementing MultiQC
+
+MultiQC documentation can be found [here](https://multiqc.info/docs/).
+
+Installation is simple. If you have Miniconda installed, you can use
+`conda install multiqc`; otherwise, try `pip install multiqc`. Other options are
+listed [here](https://multiqc.info/docs/getting_started/installation/).
+Installation will take a long time.

@@ -1,0 +1,79 @@
+---
+output: html_document
+---
+
+# Running MetaPhlAn
+
+## Background
+
+MetaPhlAn was developed by the Huttenhower lab and is designed to taxonomically
+annotate metagenomic reads.
+
+Compute Canada has [specific
+instructions](https://docs.alliancecan.ca/wiki/MetaPhlAn) for downloading
+MetaPhlAn. While they’re a good starting point, the instructions must be
+modified, especially if you’re on a server such as Beluga that can’t access the
+internet on its compute nodes. If the Compute Canada instructions are followed,
+MetaPhlAn won’t have all of the necessary database files and will try to
+download the missing ones from the internet, which breaks the code.
+
+This protocol is based on
+[MetaPhlAn4](https://github.com/biobakery/MetaPhlAn/wiki/MetaPhlAn-4) (the
+current version). It consists of the official Compute Canada instructions that
+have been tweaked to make it run with no errors.
+
+## **Recommended Clusters**
+
+This protocol will work best on clusters whose job nodes have internet access,
+but others should also work perfectly as long as the databases are properly
+installed.
+
+## **Downloading Databases**
+
+Reference databases are necessary to annotate the taxa.
+
+Download the databases into a dedicated folder in your scratch folder. This
+ensures that they can be properly accessed by the compute nodes once the job has
+been submitted.
+
+This downloads the current versions as of Sept 2024 – [check
+here](http://cmprod1.cibio.unitn.it/biobakery4/metaphlan_databases/?C=M;O=D) to
+ensure that you’re downloading the most recent versions.
+
+Do not start an interactive job (ie run an ‘salloc’ command) at this point - the
+installation will not work.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+mkdir scratch/metaphlan_databases
+cd scratch/metaphlan_databases
+
+# Download the MetaPhlAn databases
+# Also download the Bowtie2 index database (CRITICAL)
+parallel wget ::: http://cmprod1.cibio.unitn.it/biobakery4/metaphlan_databases/mpa_vOct22_CHOCOPhlAnSGB_202403.tar http://cmprod1.cibio.unitn.it/biobakery4/metaphlan_databases/mpa_vOct22_CHOCOPhlAnSGB_202403_marker_info.txt.bz2 http://cmprod1.cibio.unitn.it/biobakery4/metaphlan_databases/mpa_vOct22_CHOCOPhlAnSGB_202403_species.txt.bz2 http://cmprod1.cibio.unitn.it/biobakery4/metaphlan_databases/bowtie2_indexes/mpa_vOct22_CHOCOPhlAnSGB_202403_bt2.tar
+```
+
+The files will then be extracted to finish the installation. As this is
+computationally expensive, an interactive job is started beforehand (line 1).
+
+Line 1: remember the account has to be def-bfinlay (or your Compute Canada
+sponsor), not your own account.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+salloc --account=def-bfinlay --cpus-per-task=5 --mem=10G
+parallel tar -xf ::: *.tar # Unzip both .tar files
+parallel bunzip2 ::: *.bz2 # unzip both .bz2 files
+```
+
+Cancel the rest of your resource allocation once it’s done in order to free up
+the resources.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+# Change armetcal for your username
+squeue -u armetcal # This prints your active jobs
+```
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+scancel job-ID # Add the job ID listed in the squeue output
+```
+
+## Running MetaPhlAn4 on Multiple Samples
