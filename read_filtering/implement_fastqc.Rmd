@@ -30,7 +30,7 @@ job using compute nodes.
 Navigate to your sequences folder. First we create an output folder for our
 FastQC results. We then initialize a new job script.
 
-```{bash}
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
 mkdir path/to/sequences/FastQC
 nano run_fastqc.sh
 ```
@@ -60,7 +60,7 @@ containing all the plots in the HTML summary.
 
 ![](fastqc_html.JPG)
 
-## Implementing MultiQC
+## Implementing MultiQC (WORK IN PROGRESS)
 
 MultiQC documentation can be found [here](https://multiqc.info/docs/).
 
@@ -70,7 +70,7 @@ Installation is a multi-step process. Unfortunately, the installation is not
 smooth on the Beluga cluster (I wasn't able to successfully overcome a range of
 issues); however, installation on Cedar is possible.
 
-```{bash}
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
 module load python/3.12.4
 virtualenv --no-download multiqc_virenv/env
 source multiqc_virenv/env/bin/activate
