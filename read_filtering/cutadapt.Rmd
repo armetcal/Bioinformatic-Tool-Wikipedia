@@ -1,0 +1,16 @@
+---
+title: "cutadapt"
+author: "Avril Metcalfe-Roach"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+module load python/3.12.4
+virtualenv cutadapt-venv
+cutadapt-venv/bin/pip install cutadapt
+source cutadapt-venv/bin/activate
+# Test
+cutadapt --version
+```
+
