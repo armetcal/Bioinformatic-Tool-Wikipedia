@@ -1,12 +1,12 @@
 ---
-title: Trimming Adapters with BBMap
-output: 
-  html_document: 
-    toc: true
-    toc_depth: 3
-    toc_float:
-      collapsed: false
-      smooth_scroll: false
+title: Trimming Adapters with BBDuk 
+output:
+  html_document:
+    toc: true     
+    toc_depth: 3     
+    toc_float:       
+      collapsed: false       
+      smooth_scroll: false 
 ---
 
 # Background
@@ -19,15 +19,16 @@ Although the adapters differ between protocols, a relatively small number of
 protocols are used for the majority of sequencing runs, meaning that it is often
 not necessary to know the exact adapter sequence.
 
-BBMap contains a suite of tools. One of the tools, bbduk, can automatically find
-and remove a [range of common adapter sequences and other similar
+BBMap is a suite of tools designed to process sequencing data. One of the tools,
+bbduk, can automatically find and remove a [range of common adapter sequences
+and other similar
 contaminants](https://raw.githubusercontent.com/BioInfoTools/BBMap/refs/heads/master/resources/adapters.fa)
 such as PhiX sequences (a type of control). Custom adapter sequences can also be
 inputted if needed.
 
-## Determine BBMap compatibility with your data
+## Determine bbduk compatibility with your data
 
-The list of built-in BBMap adapters can be found in the [resources folder of the
+The list of built-in bbduk adapters can be found in the [resources folder of the
 tool](https://github.com/BioInfoTools/BBMap/tree/master/resources). The default
 collection is
 [here](https://raw.githubusercontent.com/BioInfoTools/BBMap/refs/heads/master/resources/adapters.fa)
@@ -54,7 +55,7 @@ sequence reads was performed using BBDuk and BBSplit. In the first step of QC,
 and quality trim and filter sequences."
 
 Here, we can see that the adapters for the **Nextera XT transposase** system are
-available in the list of built-in BBMap adapters. When running the tool, we can
+available in the list of built-in bbduk adapters. When running the tool, we can
 simply set `ref=adapters` or `ref=adapters.fa`.
 
 ![](adapters.JPG)
@@ -80,7 +81,7 @@ the adapter sequences for unique dual indexes (UDI) are listed in the Appendix:
 
 ![](protocol.JPG){width="468"}
 
-If we search these adapter sequences against the built-in BBMap adapters, we can
+If we search these adapter sequences against the built-in bbduk adapters, we can
 see that the areas to the left and right of the underlined indexes do indeed
 match some of the other built-in adapters; unfortunately, however, the indexes
 themselves are different. Clicking on the [Index Sequences Master
@@ -90,18 +91,18 @@ Overview** tab, we find the full list of indexes on the **xGen Normalase UDI
 Primers** tab.
 
 It is then trivial, if somewhat annoying, to build a list of all adapter
-sequences that can then be fed into BBMap. For example, the full sequences can
+sequences that can then be fed into bbduk. For example, the full sequences can
 be assembled in Excel (as shown below) and then pasted into a text file. Format
-the text file similarly to the [list of built-in BBMap
+the text file similarly to the [list of built-in bbduk
 adapters](https://raw.githubusercontent.com/BioInfoTools/BBMap/refs/heads/master/resources/adapters.fa)
 and upload it to your Compute Canada directory.
 
 ![](i7_example.JPG){width="491"}
 
-## Running BBMap
+## Running bbduk
 
 The main function used for trimming adapters is bbduk, which is part of the
-BBMap module. While BBMap is available as a module on Compute Canada, the
+bbduk module. While bbduk is available as a module on Compute Canada, the
 repository of built-in adapters will not be visible for inspection. The repo can
 be manually searched (or downloaded) at the GitHub link
 [here](https://github.com/BioInfoTools/BBMap/tree/master/resources) if needed.

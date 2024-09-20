@@ -1,0 +1,41 @@
+---
+title: Remove Human Reads with BBSplit
+output: 
+  html_document: 
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+# Background
+
+Metagenomic sequencing detects all DNA in the sample, regardless of kingdom.
+While certain sample processing kits can reduce the amount of non-microbial DNA,
+any **metagenomic sample from a human microbiome will contain some human reads**
+(often quite a large proportion).
+
+These reads can be recognized and removed by several available tools. The BBMap
+suite, which was previously used to remove adapters, can also remove human reads
+using the bbsplit tool.
+
+**BBSplit takes each read and compares it to one or more reference genomes in
+order to determine which one it matches best.** Here we can use a human
+reference genome in order to determine whether each read is likely human or
+other (i.e. microbial).
+
+# Reference Genome
+
+BBMap does not come with reference genomes, and so the representative human
+genome must be downloaded. There are standardized human reference genomes
+available online.
+
+The most recent human reference genome can be found by searching the NCBI
+database, where humans are classified as taxon #9606:
+<https://www.ncbi.nlm.nih.gov/datasets/genome/?taxon=9606>
+
+The search results should show the most recent reference genome at the top of
+the list. It should have a green check mark.
+
+![](ncbi_refgenome.JPG){width="497"}
