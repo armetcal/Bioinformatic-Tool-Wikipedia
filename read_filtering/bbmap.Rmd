@@ -1,8 +1,15 @@
 ---
-output: html_document
+title: Trimming Adapters with BBMap
+output: 
+  html_document: 
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
 ---
 
-# Trimming Adapters with BBMap
+# Background
 
 When raw sequencing files are downloaded, they still contain adapter sequences
 at the ends of each read. While necessary for sequencing, they contribute no
@@ -12,11 +19,11 @@ Although the adapters differ between protocols, a relatively small number of
 protocols are used for the majority of sequencing runs, meaning that it is often
 not necessary to know the exact adapter sequence.
 
-BBMap contains a suite of tools that can automatically find and remove a [range
-of common adapter sequences and other similar
+BBMap contains a suite of tools. One of the tools, bbduk, can automatically find
+and remove a [range of common adapter sequences and other similar
 contaminants](https://raw.githubusercontent.com/BioInfoTools/BBMap/refs/heads/master/resources/adapters.fa)
 such as PhiX sequences (a type of control). Custom adapter sequences can also be
-input if needed.
+inputted if needed.
 
 ## Determine BBMap compatibility with your data
 
@@ -32,7 +39,10 @@ section of the original manuscript. Check the supplementary data to see if there
 are any supplementary methods available, which may provide additional
 information. Two examples are shown below:
 
-### Wallen (2022): [Metagenomics of Parkinson’s disease implicates the gut microbiome in multiple disease mechanisms](10.1038/s41467-022-34667-x)
+### Straightforward example
+
+Wallen et. al (2022): [Metagenomics of Parkinson’s disease implicates the gut
+microbiome in multiple disease mechanisms](10.1038/s41467-022-34667-x)
 
 **Methods \> DNA isolation, library preparation, next-generation sequencing:**
 "The sequencing libraries were prepared by using the **Illumina Nextera XT
@@ -44,11 +54,15 @@ sequence reads was performed using BBDuk and BBSplit. In the first step of QC,
 and quality trim and filter sequences."
 
 Here, we can see that the adapters for the **Nextera XT transposase** system are
-available in the list of built-in BBMap adapters:
+available in the list of built-in BBMap adapters. When running the tool, we can
+simply set `ref=adapters` or `ref=adapters.fa`.
 
 ![](adapters.JPG)
 
-### Metcalfe-Roach (2024): [Metagenomic Analysis Reveals Large‐Scale Disruptions of the Gut Microbiome in Parkinson's Disease](10.1002/mds.29959)
+### Tricky example
+
+Metcalfe-Roach et. al (2024): [Metagenomic Analysis Reveals Large‐Scale
+Disruptions of the Gut Microbiome in Parkinson's Disease](10.1002/mds.29959)
 
 Here the Methods section in the manuscript says "shotgun metagenomic sequencing
 was performed on the **Illumina NovaSeq platform**", but does not explicitly
@@ -144,3 +158,7 @@ the trimmed sequences matched the Nextera Transposase adapter sequence, which
 was used to prep the library.
 
 ![](bbduk_output.JPG){width="481"}
+
+Once bbduk has been run and it has been verified that the adapters are being
+trimmed as expected, the output fastq.gz files can be used for the next step in
+the pipeline.

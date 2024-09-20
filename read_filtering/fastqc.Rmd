@@ -1,8 +1,15 @@
 ---
-output: html_document
+title: Check Read Quality With FastQC and MultiQC
+output: 
+  html_document: 
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
 ---
 
-# Check Read Quality With FastQC and MultiQC
+# Background
 
 FastQC is a desktop application that can be used to visually inspect the quality
 of reads stored in fastq files. However, it can also be run via the command
@@ -19,7 +26,7 @@ individually inspected. Instead, we can use MultiQC, which combines the FastQC
 results into a single HTML document, making it much more convenient for
 high-throughput projects. This tool is not pre-installed on Compute Canada.
 
-## Implementing FastQC
+# FastQC
 
 FastQC is designed to be run on fastq files. The implementation is very simple:
 we simply load the FastQC module, make a list of all our fastq files, and then
@@ -60,11 +67,11 @@ containing all the plots in the HTML summary.
 
 ![](fastqc_html.JPG)
 
-## Implementing MultiQC (WORK IN PROGRESS)
+# MultiQC (WORK IN PROGRESS)
 
 MultiQC documentation can be found [here](https://multiqc.info/docs/).
 
-### Installing MultiQC
+## Installing MultiQC
 
 Installation is a multi-step process. Unfortunately, the installation is not
 smooth on the Beluga cluster (I wasn't able to successfully overcome a range of

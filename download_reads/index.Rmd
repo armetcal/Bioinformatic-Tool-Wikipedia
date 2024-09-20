@@ -1,8 +1,13 @@
 ---
-output: html_document
+title: Download FastQ Reads to Compute Canada
+output: 
+  html_document: 
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
 ---
-
-# Download FastQ Reads to Compute Canada
 
 ## Choosing a compute cluster
 
@@ -43,7 +48,7 @@ it may be worth downloading the files on Cedar etc. using a script and then
 transferring them afterward. That way your computer doesn’t have to stay
 connected to the server for the entire download.
 
-## Recommended Method: SRA Toolkit
+## **Recommended Method: SRA Toolkit**
 
 This method works for all file sizes, does not require new installations, and is
 reasonably fast.
@@ -88,7 +93,7 @@ module load sra-toolkit/3.0.9 # This must be run every time CC restarts
 cat filtered_accession_list.txt | parallel -j 2 fastq-dump --split-files --origfmt --gzip {}
 ```
 
-### **Optional: Move forward reads into a separate folder**
+### Optional: Move forward reads into a separate folder
 
 Many programs (such as MetaPhlAn) only use the forward reads, and so it is often
 convenient to divide the reads into separate folders.
