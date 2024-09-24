@@ -1,5 +1,5 @@
 ---
-title: Trimming Adapters with BBDuk 
+title: Trimming Reads with BBDuk 
 output:
   html_document:
     toc: true     
@@ -13,15 +13,17 @@ output:
 
 When raw sequencing files are downloaded, they still contain adapter sequences
 at the ends of each read. While necessary for sequencing, they contribute no
-usable information and therefore serve only to contaminate the reads.
+usable information and therefore serve only to contaminate the reads. In
+addition, read quality can vary along its length, often requiring the read ends
+to be trimmed in order to remove untrustworthy base calls.
 
 Although the adapters differ between protocols, a relatively small number of
 protocols are used for the majority of sequencing runs, meaning that it is often
 not necessary to know the exact adapter sequence.
 
 BBMap is a suite of tools designed to process sequencing data. One of the tools,
-bbduk, can automatically find and remove a [range of common adapter sequences
-and other similar
+bbduk, can quality trim reads AND automatically find and remove a [range of
+common adapter sequences and other similar
 contaminants](https://raw.githubusercontent.com/BioInfoTools/BBMap/refs/heads/master/resources/adapters.fa)
 such as PhiX sequences (a type of control). Custom adapter sequences can also be
 inputted if needed.
@@ -99,14 +101,18 @@ the text file similarly to the [list of built-in bbduk
 adapters](https://raw.githubusercontent.com/BioInfoTools/BBMap/refs/heads/master/resources/adapters.fa)
 and upload it to your Compute Canada directory.
 
+\*\*Note: degenerate sequences can now also be addressed by the tool. See
+"Matching degenerate sequences such as primers" in the
+[docs](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/).
+
 ![](images/i7_example.JPG){width="516"}
 
 # Running bbduk
 
-The main function used for trimming adapters is bbduk, which is part of the
-bbduk module. While bbduk is available as a module on Compute Canada, the
-repository of built-in adapters will not be visible for inspection. The repo can
-be manually searched (or downloaded) at the GitHub link
+The main function used for trimming reads is bbduk, which is part of the BBMap
+module. While BBMap is available as a module on Compute Canada, the repository
+of built-in adapters will not be visible for inspection. The repo can be
+manually searched (or downloaded) at the GitHub link
 [here](https://github.com/BioInfoTools/BBMap/tree/master/resources) if needed.
 
 Ideally, both the forward and reverse reads will be inputted. If using only the
@@ -132,7 +138,8 @@ module load StdEnv/2023 bbmap/39.06
 mkdir bbduk_out
 mkdir bbduk_out/stats
 
-# Trim the reads to remove (built-in) adapters and PhiX sequences
+# Trim the reads to remove (built-in) adapters & PhiX sequences AND
+# to remove any bases under a certain quality score.
 # The following is adapted from Wallen et. al (2022), as their samples are being used as an example above. Their supplementary code can be found in their paper.
 The script used to carry out the task above in the HPC environment is
 bbduk.sh \
@@ -147,9 +154,10 @@ bbduk.sh \
  # ftm, trim to a length divisible by 5; tpe, fwd and rev trimmed to same length
  # tbo, BBmerge implementation for additional trimming (pairwise reads only)
  # qtrim=rl, right and left trimming; trimq, trim to this quality score
+ # maq=25, throw out any reads with a mean quality score <25 (calculated after trimming)
  # minlen, remove sequences below n length
  # ref, list of possible adapters/contaminants to trim (these are built in)
- ftm=5 tpe tbo qtrim=rl trimq=25 minlen=50 ref=adapters,phix \
+ ftm=5 tpe tbo qtrim=rl trimq=25 maq=25 minlen=50 ref=adapters,phix \
  # bbduk uses half available memory by default, this uses all available
  -Xmx${MAX_MEM}g
 ```

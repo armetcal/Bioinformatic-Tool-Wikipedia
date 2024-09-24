@@ -180,8 +180,9 @@ affected.
 
 # Next Step
 
-After filtering out the human reads, the fastq files should be filtered to
-remove low-complexity samples.
+Perform a final FastQC analysis to ensure that all remaining reads are high
+quality. These clean reads can then be annotated and used for downstream
+analyses.
 
-[Step 2d: Remove low-complexity sequences using
-BBDuk](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/entropy.html)
+[Step 3: Taxonomic Annotation with
+MetaPhlAn](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/annotation)
