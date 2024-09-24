@@ -1564,14 +1564,80 @@ match the index will be removed.</p>
 <h2>Stage 1: Building the index</h2>
 <p>Building the index is more computationally intensive than running the
 tool and therefore we will submit a job request. The following code will
-take 2-3 hours to run.</p>
+take 2-3 hours to run. In your working directory, type
+<code>nano run_index.sh</code> and paste the following:</p>
+<pre class="bash"><code>#!/bin/bash
+
+#SBATCH --account=def-bfinlay   # Change bfinlay to your professor&#39;s username
+#SBATCH --time=03:00:00      # Adjust time as needed
+#SBATCH --cpus-per-task=10
+#SBATCH --mem=25G
+
+# Create a folder to store the index files
+mkdir index
+
+# Activate the HoCoRT environment
+source activate hocort
+
+# Create the index
+# bowtie2 uses bowtie2 to build the index; input is the reference genome;
+# output is the FULL filepath that says where the index files will be stored.
+# output must finish with a prefix used for the index files.
+# For example, $SCRATCH/yourworkingdirectory/index/human adds index files called human.index.1.bt2, human.index.2.bt2, etc to the index folder created above
+hocort index bowtie2 \
+--input GCF_000001405.40_GRCh38.p14_genomic.fna.gz \
+--output full/path/to/index/human.index</code></pre>
+<p>After the index is created, there should be several new files within
+a folder called <code>index</code>. Using the human reference genome as
+listed above, the output included human.index.1.bt2, human.index.2.bt2,
+human.index.3.bt2, human.index.4.bt2, human.index.rev.1.bt2, and
+human.index.rev.2.bt2 as of September 2024.</p>
+</div>
+<div id="stage-2-filtering-samples" class="section level2">
+<h2>Stage 2: Filtering samples</h2>
+<p>Once the index is created, the tool can be run on each set of paired
+reads (or just the single-end forward reads if desired). While the
+processing time for each sample is far less than the processing time for
+building the index, be sure to request enough time to process all of
+your samples.</p>
+<p>For one paired-end sample with 7.3 million reads of 150 bp, the
+program took 4.5 minutes to run using the parameters listed in the below
+script. For 50 samples, this works out to 3.75 hours; be sure to add
+~20-30% to the time estimate (ex. 4.5-5 hours).</p>
+<p>In your working directory, type <code>nano run_hocort.sh</code> and
+paste the following:</p>
+<pre class="bash"><code>#!/bin/bash
+
+#SBATCH --account=def-bfinlay   # Change bfinlay to your professor&#39;s username
+#SBATCH --time=05:00:00      # Adjust time as needed
+#SBATCH --cpus-per-task=10
+#SBATCH --mem=25G
+
+# Make the output directory
+mkdir hocort_out
+
+# Activate the hocort environment
+source activate hocort
+
+# Run tool on paired-end, adapter-trimmed sequences
+# -x gives the index (compiled in Stage 1)
+# For paired sequences, give 2 inputs and 2 outputs
+# --filter true will give us anything that doesn&#39;t match the index (all non-human reads in this case)
+hocort map bowtie2 \
+-x full/path/to/index/human.index \
+-i bbduk_out/file_1.fastq.gz bbduk_out/file_2.fastq.gz \
+-o hocort_out/file_1.fastq.gz hocort_out/file_2.fastq.gz \
+--filter true</code></pre>
+<p>Fastq files with human reads removed will be saved to the hocort_out
+folder. As usual, <a href="https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html">FastQC</a>
+can be run on the output samples to see how the quality attributes were
+affected.</p>
 </div>
 </div>
 <div id="next-step" class="section level1">
 <h1>Next Step</h1>
-<p>After adapter trimming, <a href="https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html">FastQC</a>
-can be rerun in order to confirm that the read quality has improved.
-Afterwards, reads should be filtered for general read quality.</p>
+<p>After filtering out the human reads, the fastq files should be
+filtered for general read quality.</p>
 <p><a href="https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/prinseq.html">Step
 2d: Remove low-quality sequences using PRINSEQ</a></p>
 </div>

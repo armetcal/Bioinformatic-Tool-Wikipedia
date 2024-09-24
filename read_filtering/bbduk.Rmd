@@ -38,7 +38,9 @@ Unfortunately, not all publicly-available datasets have adapter information
 available. If present, adapter information can usually be found in the Methods
 section of the original manuscript. Check the supplementary data to see if there
 are any supplementary methods available, which may provide additional
-information. Two examples are shown below:
+information. Sometimes the FastQC output will predict what adapter sequences are
+present under "Overrepresented sequences" (*see Validate with FastQC*). Two
+examples are shown below:
 
 ## Straightforward example
 
@@ -164,13 +166,26 @@ Once bbduk has been run and it has been verified that the adapters are being
 trimmed as expected, the output fastq.gz files can be used for the next step in
 the pipeline.
 
+# Validate with FastQC
+
+FastQC can recognize overrepresented sequences, including adapter sequences. If
+the adapter sequences are generic, it may be able to provide the likely name of
+the adapter. For example, the FastQC of a raw file gave the following
+information under **Overrepresented sequences**:
+
+![](images/clipboard-2477683477.png)
+
+The original paper did not list any information related to adapters, and so
+BBDuk was run using ref=adapters,phix. By running FastQC on the BBDuk output, we
+can see that this overrepresented sequence was indeed removed, thus validating
+the BBDuk output:
+
+![](images/clipboard-2696085511.png){width="246"}
+
 # Next Step
 
-After adapter trimming,
-[FastQC](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html)
-can be rerun in order to confirm that the read quality has improved. Afterwards,
-other contaminant reads should be removed. For gut microbiomes, this is usually
-reads mapping to host DNA.
+After adapter trimming, other contaminant reads should be removed. For gut
+microbiomes, this is usually reads mapping to host DNA.
 
 [Step 2c: Remove human reads with
 HoCoRT](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/hocort.html)
