@@ -60,7 +60,7 @@ Here, we can see that the adapters for the **Nextera XT transposase** system are
 available in the list of built-in bbduk adapters. When running the tool, we can
 simply set `ref=adapters` or `ref=adapters.fa`.
 
-![](adapters.JPG)
+![](images/adapters.JPG){width="384"}
 
 ## Tricky example
 
@@ -81,7 +81,7 @@ Checking the [xGen DNA Library Prep EZ
 documentation](https://sfvideo.blob.core.windows.net/sitefinity/docs/default-source/protocol/xgen-dna-library-prep-ez-kit-and-xgen-dna-library-prep-ez-uni-kits-protocol.pdf?sfvrsn=57b1e007_14),
 the adapter sequences for unique dual indexes (UDI) are listed in the Appendix:
 
-![](protocol.JPG){width="468"}
+![](images/protocol.JPG){width="532"}
 
 If we search these adapter sequences against the built-in bbduk adapters, we can
 see that the areas to the left and right of the underlined indexes do indeed
@@ -99,7 +99,7 @@ the text file similarly to the [list of built-in bbduk
 adapters](https://raw.githubusercontent.com/BioInfoTools/BBMap/refs/heads/master/resources/adapters.fa)
 and upload it to your Compute Canada directory.
 
-![](i7_example.JPG){width="491"}
+![](images/i7_example.JPG){width="516"}
 
 # Running bbduk
 
@@ -173,14 +173,14 @@ the adapter sequences are generic, it may be able to provide the likely name of
 the adapter. For example, the FastQC of a raw file gave the following
 information under **Overrepresented sequences**:
 
-![](images/clipboard-2477683477.png)
+![](images/overrep.png)
 
 The original paper did not list any information related to adapters, and so
 BBDuk was run using ref=adapters,phix. By running FastQC on the BBDuk output, we
 can see that this overrepresented sequence was indeed removed, thus validating
 the BBDuk output:
 
-![](images/clipboard-2696085511.png){width="246"}
+![](images/overrep_fixed.png){width="246"}
 
 # Next Step
 

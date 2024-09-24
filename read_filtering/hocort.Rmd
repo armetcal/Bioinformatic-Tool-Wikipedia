@@ -46,16 +46,16 @@ database, where humans are classified as taxon #9606:
 The search results should show the most recent reference genome at the top of
 the list. It should have a green check mark.
 
-![](ncbi_refgenome.JPG){width="497"}
+![](images/ncbi_refgenome.JPG)
 
 Click the Assembly link and select the FTP tab (highlighted below).
 
-![](genome_ftp.JPG){width="380"}
+![](images/genome_ftp.JPG){width="321"}
 
 A range of download options will be available. Right click on the
 \_genomic.fna.gz file (genomic data in FASTA format) and copy the link.
 
-![](genome_alloptions.JPG)
+![](images/genome_alloptions.JPG)
 
 On Compute Canada, navigate to your working directory and download the genome
 using wget.

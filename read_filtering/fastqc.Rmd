@@ -65,7 +65,7 @@ parallel fastqc --outdir=path/to/sequences/FastQC ::: path/to/sequences/*_1.fast
 There are two outputs per fastq file: an HTML summary and a zipped file
 containing all the plots in the HTML summary.
 
-![](fastqc_html.JPG)
+![](images/fastqc_html.JPG)
 
 <!-- # MultiQC (WORK IN PROGRESS) -->
 
@@ -74,20 +74,27 @@ containing all the plots in the HTML summary.
 <!-- ## Installing MultiQC -->
 
 <!-- Installation is a multi-step process. Unfortunately, the installation is not -->
+
 <!-- smooth on the Beluga cluster (I wasn't able to successfully overcome a range of -->
+
 <!-- issues); however, installation on Cedar is possible. -->
 
 <!-- ```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'} -->
+
 <!-- module load python/3.12.4 -->
+
 <!-- virtualenv --no-download multiqc_virenv/env -->
+
 <!-- source multiqc_virenv/env/bin/activate -->
 
-
-
 <!-- # Load the Rust module -->
+
 <!-- module load StdEnv/2023 rust/1.76.0 -->
+
 <!-- pkg install binutils -->
+
 <!-- pip install multiqc -->
+
 <!-- ``` -->
 
 # Next Step
