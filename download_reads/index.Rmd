@@ -9,7 +9,7 @@ output:
       smooth_scroll: false
 ---
 
-## Choosing a compute cluster
+# Choosing a compute cluster
 
 Compute Canada has a variety of clusters to choose from, all with varying
 parameters. Parameters include internet access on the computational nodes, the
@@ -48,7 +48,7 @@ it may be worth downloading the files on Cedar etc. using a script and then
 transferring them afterward. That way your computer doesn’t have to stay
 connected to the server for the entire download.
 
-## **Recommended Method: SRA Toolkit**
+# **Recommended Method: SRA Toolkit**
 
 This method works for all file sizes, does not require new installations, and is
 reasonably fast.
@@ -93,7 +93,7 @@ module load sra-toolkit/3.0.9 # This must be run every time CC restarts
 cat filtered_accession_list.txt | parallel -j 2 fastq-dump --split-files --origfmt --gzip {}
 ```
 
-### Optional: Move forward reads into a separate folder
+# Optional: Move forward reads into a separate folder
 
 Many programs (such as MetaPhlAn) only use the forward reads, and so it is often
 convenient to divide the reads into separate folders.
@@ -111,14 +111,14 @@ mv *_1.fastq.gz fwd_reads
 mv *_2.fastq.gz rev_reads
 ```
 
-## Alternative Method: ENA File Downloader
+# Alternative Method: ENA File Downloader
 
 This method is less useful because it only works for files under 5 GB, is
 slightly less easy to use, and can't be run on Cedar without requesting
 resources as it requires \>15GB RAM. One benefit is that the program is able to
 email you once the downloads have finished.
 
-### Part 1: Setup (First time only)
+## Part 1: Setup (First time only)
 
 First the ENA File Downloader program must be downloaded and installed. This can
 be done in the home directory; however, if you plan to download the files as
@@ -152,7 +152,7 @@ IMPORTANT: if using Aspera, you will need to direct the file downloader program
 to the Aspera app folder. The file path will be `.aspera/connect`, relative to
 the installation folder.
 
-### Part 2: Running the downloader
+## Part 2: Running the downloader
 
 Initialize the folder where the reads will be stored and run the Java tool.
 
@@ -179,4 +179,13 @@ then run `module load java/desiredversion` before running the tool.
 
 The following shows the console output of a successful implementation:
 
-![](Aspera download.png)
+![](Aspera%20download.png)
+
+# Next Step
+
+After downloading raw reads, the reads will need to be processed in order to
+remove adapter sequences, human reads, and low-quality sequences. Read quality
+will be tracked throughout.
+
+[Step 2a: Checking read quality with
+FastQC](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html)

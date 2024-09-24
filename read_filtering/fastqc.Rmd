@@ -1,5 +1,5 @@
 ---
-title: Check Read Quality With FastQC and MultiQC
+title: Check Read Quality With FastQC #and MultiQC
 output: 
   html_document: 
     toc: true
@@ -67,25 +67,33 @@ containing all the plots in the HTML summary.
 
 ![](fastqc_html.JPG)
 
-# MultiQC (WORK IN PROGRESS)
+<!-- # MultiQC (WORK IN PROGRESS) -->
 
-MultiQC documentation can be found [here](https://multiqc.info/docs/).
+<!-- MultiQC documentation can be found [here](https://multiqc.info/docs/). -->
 
-## Installing MultiQC
+<!-- ## Installing MultiQC -->
 
-Installation is a multi-step process. Unfortunately, the installation is not
-smooth on the Beluga cluster (I wasn't able to successfully overcome a range of
-issues); however, installation on Cedar is possible.
+<!-- Installation is a multi-step process. Unfortunately, the installation is not -->
+<!-- smooth on the Beluga cluster (I wasn't able to successfully overcome a range of -->
+<!-- issues); however, installation on Cedar is possible. -->
 
-```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
-module load python/3.12.4
-virtualenv --no-download multiqc_virenv/env
-source multiqc_virenv/env/bin/activate
+<!-- ```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'} -->
+<!-- module load python/3.12.4 -->
+<!-- virtualenv --no-download multiqc_virenv/env -->
+<!-- source multiqc_virenv/env/bin/activate -->
 
 
 
-# Load the Rust module
-module load StdEnv/2023 rust/1.76.0
-pkg install binutils
-pip install multiqc
-```
+<!-- # Load the Rust module -->
+<!-- module load StdEnv/2023 rust/1.76.0 -->
+<!-- pkg install binutils -->
+<!-- pip install multiqc -->
+<!-- ``` -->
+
+# Next Step
+
+After the initial quality check, adapter sequences (used during the sequencing
+process) will be trimmed from the reads.
+
+[Step 2b: Trimming adapters with
+BBDuk](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/bbduk.html)

@@ -1,0 +1,113 @@
+---
+title: Remove Human Reads with HoCoRT
+output:
+  html_document:
+    toc: true     
+    toc_depth: 3     
+    toc_float:       
+      collapsed: false       
+      smooth_scroll: false 
+---
+
+# Background
+
+Metagenomic sequencing detects all DNA in the sample, regardless of kingdom.
+While certain sample processing kits can reduce the amount of non-microbial DNA,
+any **metagenomic sample from a human microbiome will contain some human reads**
+(often quite a large proportion).
+
+These reads can be recognized and removed by several available tools. The BBMap
+suite, which was previously used to remove adapters, can also remove human reads
+using the bbsplit tool; however, it requires a large amount of RAM and is [less
+accurate than other
+methods](https://link.springer.com/article/10.1186/s12859-023-05492-w).
+
+We will use [HoCoRT (host contamination remover
+tool)](https://link.springer.com/article/10.1186/s12859-023-05492-w), a newer
+tool first published in 2023. Installation and implementation is simple. The
+following instructions are adapted from the tool's [GitHub
+repository](https://github.com/ignasrum/hocort?tab=readme-ov-file).
+
+**HoCoRT takes each read and compares it to one or more reference genomes in
+order to determine which one it matches best.** Here we can use a human
+reference genome in order to determine whether each read is likely human or
+other (i.e. microbial).
+
+# Reference Genome
+
+HoCoRT does not come with reference genomes, and so the representative human
+genome must be downloaded. There are standardized human reference genomes
+available online.
+
+The most recent human reference genome can be found by searching the NCBI
+database, where humans are classified as taxon #9606:
+<https://www.ncbi.nlm.nih.gov/datasets/genome/?taxon=9606>
+
+The search results should show the most recent reference genome at the top of
+the list. It should have a green check mark.
+
+![](ncbi_refgenome.JPG){width="497"}
+
+Click the Assembly link and select the FTP tab (highlighted below).
+
+![](genome_ftp.JPG){width="380"}
+
+A range of download options will be available. Right click on the
+\_genomic.fna.gz file (genomic data in FASTA format) and copy the link.
+
+![](genome_alloptions.JPG)
+
+On Compute Canada, navigate to your working directory and download the genome
+using wget.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz
+```
+
+# Installing HoCoRT
+
+HoCoRT installation is simple; however, because HoCoRT requires specific
+versions of a large variety of packages, **HoCoRT must be installed into a new
+environment** so that it does not overwrite any packages that are already
+installed on your account. An environment is essentially a 'clean' area of your
+account: anything installed in the environment is restricted to the environment,
+and it ignores any programs installed outside of the environment. This allows
+you to install multiple versions of various programs as needed without them
+interfering with each other.
+
+In your working directory, run the following command. This will create a new
+environment called 'hocort' and will install the hocort package (+ dependencies)
+using bioconda. If any errors arise, try the manual installation listed in the
+[GitHub repo](https://github.com/ignasrum/hocort?tab=readme-ov-file).
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+conda create -n hocort -c conda-forge -c bioconda hocort
+```
+
+After installation, the environment can be activated by running
+`source activate hocort`. This will be done while running a submitted job (see
+next section), and does not need to be done directly after installation in the
+terminal.
+
+# Running HoCoRT
+
+The HoCoRT command will be run in two stages. First we will create an 'index'
+(read dictionary) from the downloaded human genome. The index will act as the
+reference genome, where reads that either match or don't match the index will be
+removed.
+
+## Stage 1: Building the index
+
+Building the index is more computationally intensive than running the tool and
+therefore we will submit a job request. The following code will take 2-3 hours
+to run.
+
+# Next Step
+
+After adapter trimming,
+[FastQC](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html)
+can be rerun in order to confirm that the read quality has improved. Afterwards,
+reads should be filtered for general read quality.
+
+[Step 2d: Remove low-quality sequences using
+PRINSEQ](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/prinseq.html)

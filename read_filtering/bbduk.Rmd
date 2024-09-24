@@ -26,7 +26,7 @@ contaminants](https://raw.githubusercontent.com/BioInfoTools/BBMap/refs/heads/ma
 such as PhiX sequences (a type of control). Custom adapter sequences can also be
 inputted if needed.
 
-## Determine bbduk compatibility with your data
+# Determine bbduk compatibility with your data
 
 The list of built-in bbduk adapters can be found in the [resources folder of the
 tool](https://github.com/BioInfoTools/BBMap/tree/master/resources). The default
@@ -40,7 +40,7 @@ section of the original manuscript. Check the supplementary data to see if there
 are any supplementary methods available, which may provide additional
 information. Two examples are shown below:
 
-### Straightforward example
+## Straightforward example
 
 Wallen et. al (2022): [Metagenomics of Parkinson’s disease implicates the gut
 microbiome in multiple disease mechanisms](10.1038/s41467-022-34667-x)
@@ -60,7 +60,7 @@ simply set `ref=adapters` or `ref=adapters.fa`.
 
 ![](adapters.JPG)
 
-### Tricky example
+## Tricky example
 
 Metcalfe-Roach et. al (2024): [Metagenomic Analysis Reveals Large‐Scale
 Disruptions of the Gut Microbiome in Parkinson's Disease](10.1002/mds.29959)
@@ -99,7 +99,7 @@ and upload it to your Compute Canada directory.
 
 ![](i7_example.JPG){width="491"}
 
-## Running bbduk
+# Running bbduk
 
 The main function used for trimming adapters is bbduk, which is part of the
 bbduk module. While bbduk is available as a module on Compute Canada, the
@@ -163,3 +163,14 @@ was used to prep the library.
 Once bbduk has been run and it has been verified that the adapters are being
 trimmed as expected, the output fastq.gz files can be used for the next step in
 the pipeline.
+
+# Next Step
+
+After adapter trimming,
+[FastQC](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html)
+can be rerun in order to confirm that the read quality has improved. Afterwards,
+other contaminant reads should be removed. For gut microbiomes, this is usually
+reads mapping to host DNA.
+
+[Step 2c: Remove human reads with
+HoCoRT](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/hocort.html)
