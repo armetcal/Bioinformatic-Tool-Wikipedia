@@ -120,13 +120,62 @@ Then run the script using `sbatch run_fastqc.sh`.
 
 ## 2b. Outputs
 
+In our fastqc_out folder, two files are generated for each input file. One is an
+HTML page summarizing the quality metrics, and the other is a zip file
+containing all the images within the HTML file.
+
+The HTML files can be downloaded from Compute Canada using the Globus online
+tool and opened in your browser. **Both samples fail certain tests and have
+warnings in others.**
+
+Both samples fail the **Per Base Sequence Content** test. This artifact is
+common in sequencing libraries when observed in the beginning of the read.
+Notably, this is a technical bias, but trimming is not recommended as they still
+represent real DNA and trimming does not seem to improve read quality (see [this
+link](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/3%20Analysis%20Modules/4%20Per%20Base%20Sequence%20Content.html)
+for more info).
+
+![](images/clipboard-1730980174.png){width="446"}
+
+Both samples have warnings in **Sequence Duplication Levels**, meaning that
+non-unique sequences make up \>20% of the total reads. Ideally, most reads
+should have no duplication (left side of the plot). These may be contaminants
+such as primers, adapters, etc, or might point to PCR overamplification when
+prepping the library. See [this
+link](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/3%20Analysis%20Modules/8%20Duplicate%20Sequences.html)
+for more info.
+
+![](images/clipboard-2967074510.png){width="435"}
+
+Sample 1 (SRR19065033) also shows a warning for **GC content** - it is not as
+normal as expected. However, the deviation is somewhat minor. Spikes may
+indicate the presence of specific contaminants, but no spikes are apparent
+here. See [this
+link](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/3%20Analysis%20Modules/5%20Per%20Sequence%20GC%20Content.html)
+for more info.
+
+![](images/clipboard-1921857521.png){width="431"}
+
+Sample 2 shows a warning for **Adapter Content**. Notably, it identifies the
+type of adapter detected: the Nextera Transposase Sequence adapter. This matches
+the adapters described in the Wallen et. al paper. See [this
+link](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/3%20Analysis%20Modules/10%20Adapter%20Content.html)
+for more info.
+
+![](images/clipboard-3490348630.png){width="426"}
+
+Overall, the QC has only demonstrated the necessity of several filtering steps
+that are part of the regular pipeline (ex. adapter trimming). No other problems
+with the library are apparent.
+
 # Step 3: Trim and Filter
 
 ## 3a. Run Code
 
-Start a new script by writing `nano run_bbduk.sh`. In the script, paste the
-following and then hit Ctrl+S and Ctrl+X to save and exit. Note that the time is
-designed for only four read files (two samples).
+Start a new script in the project directory by entering `nano run_bbduk.sh`. In
+the script, paste the following and then hit Ctrl+S and Ctrl+X to save and exit.
+Note that the time is designed for only four read files (two samples). Run the
+script using `sbatch run_bbduk.sh`.
 
 ```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
 #!/bin/bash
@@ -144,13 +193,18 @@ mkdir bbduk_out
 mkdir bbduk_out/stats
 
 # Trim and filter, all in one step
-bbduk.sh \
- in=path/to/fwd/reads/file_1.fastq.gz \
- in2=path/to/rev/reads/file_2.fastq.gz \
- out=bbduk_out/file_1.fastq.gz \
- out2=bbduk_out/file_2.fastq.gz \
- outm=bbduk_out/file_removed.fastq.gz \
- stats=bbduk_out/stats/file_stats.txt \
- tpe tbo qtrim=rl trimq=25 maq=25 minlen=50 ref=adapters,phix \
- -Xmx15g
+# First we read in all the unique sequencing file names, then pull out 
+# the sample names, and then read them through our bbduk.sh pipeline.
+# {} acts as a placeholder for the sample names.
+ls *_1.fastq.gz | sed 's/_1.fastq.gz//' | parallel bbduk.sh \
+in=sequences/{}_1.fastq.gz \
+in2=sequences/{}_2.fastq.gz \
+out=bbduk_out/{}_1.fastq.gz \
+out2=bbduk_out/{}_2.fastq.gz \
+outm=bbduk_out/{}_removed.fastq.gz \
+stats=bbduk_out/stats/{}_stats.txt \
+tpe tbo qtrim=rl trimq=25 maq=25 minlen=50 ref=adapters,phix \
+-Xmx15g
 ```
+
+## 3b. Outputs
