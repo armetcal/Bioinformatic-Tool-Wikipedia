@@ -144,8 +144,6 @@ module load StdEnv/2023 bbmap/39.06 java/21.0.1
 mkdir bbduk_out
 mkdir bbduk_out/stats
 
-# PART 1 AND 2: TRIMMING
-
 # Trim the reads to remove (built-in) adapters & PhiX sequences AND
 # to remove any bases under a certain quality score.
 # The following is adapted from Wallen et. al (2022), as their samples are being used as an example above. Their supplementary code can be found in their paper.
