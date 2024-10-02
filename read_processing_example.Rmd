@@ -248,7 +248,7 @@ will contain any reads that were filtered out.
 
 Lastly, each file in the `stats` subfolder contains a summary of the sequences
 that were filtered out of the reads. The sequences were specified by the `-ref`
-command in the `bbduk.sh` function. In this case, we filtered out Phix
+command in the `bbduk.sh` function. In this case, we filtered out PhiX
 contaminant sequences and adapters. The stats file tells us that 3.8% of the
 data were filtered out, with the vast majority of the reads matching the adapter
 sequences described in the paper's Methods section.
