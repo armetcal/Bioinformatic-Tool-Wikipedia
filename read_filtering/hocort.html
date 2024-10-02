@@ -1636,10 +1636,13 @@ affected.</p>
 </div>
 <div id="next-step" class="section level1">
 <h1>Next Step</h1>
-<p>After filtering out the human reads, the fastq files should be
-filtered to remove low-complexity samples.</p>
-<p><a href="https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/entropy.html">Step
-2d: Remove low-complexity sequences using BBDuk</a></p>
+<p>At this point, the reads have been trimmed to remove adapters and
+low-quality end sequences, filtered to remove monomeric repeats and
+low-quality reads, and all contaminating human reads have been filtered
+out. We have also checked read quality using FastQC. The reads can now
+be used for downstream analysis!</p>
+<p><a href="https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/annotation">Step
+3: Taxonomic Annotation with MetaPhlAn4</a></p>
 </div>
 
 

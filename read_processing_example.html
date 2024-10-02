@@ -1570,7 +1570,7 @@ save and exit. Note that the time is designed for only four read files
 <pre class="bash"><code>#!/bin/bash
 
 #SBATCH --account=def-bfinlay   # Change bfinlay to your professor&#39;s username
-#SBATCH --time=01:00:00      # Adjust time as needed
+#SBATCH --time=00:15:00      # Adjust time as needed
 #SBATCH --cpus-per-task=10
 #SBATCH --mem=15G 
 
@@ -1580,7 +1580,7 @@ mkdir fastqc_out
 
 # Load FastQC and its dependencies - update versions as needed.
 module load StdEnv/2023 fastqc/0.12.1
-# Run FastQC on all forward read files
+# Run FastQC on all read files
 parallel fastqc --outdir=fastqc_out ::: sequences/*.fastq.gz</code></pre>
 <p>Then run the script using <code>sbatch run_fastqc.sh</code>.</p>
 </div>
@@ -1782,6 +1782,39 @@ fastq.gz files.</p>
 <p>Note that the output files are slightly larger than the inputs; this
 is simply because the fastq files were re-zipped by HoCoRT using a
 different format and is not a cause for concern.</p>
+</div>
+</div>
+<div id="step-5-check-quality" class="section level1">
+<h1>Step 5: Check Quality</h1>
+<p>We will assess the quality of the cleaned reads and compare the
+quality to the raw reads.</p>
+<div id="a.-run-code-4" class="section level2">
+<h2>5a. Run Code</h2>
+<p>Start a new script in the project directory by entering
+<code>nano run_fastqc_clean.sh</code>. In the script, paste the
+following and then hit Ctrl+S and Ctrl+X to save and exit. Note that the
+time is designed for only four read files (two samples). Run the script
+using <code>sbatch run_fastqc_clean.sh</code>.</p>
+<pre class="bash"><code>#!/bin/bash  
+
+#SBATCH --account=def-bfinlay   # Change bfinlay to your professor&#39;s username #SBATCH --time=00:15:00      # Adjust time as needed 
+#SBATCH --cpus-per-task=10 
+#SBATCH --mem=15G   # Make the folder that will store all fastqc outputs 
+
+mkdir fastqc_out/clean  
+# Load FastQC and its dependencies - update versions as needed
+module load StdEnv/2023 fastqc/0.12.1 
+
+# Run FastQC on all read files 
+parallel fastqc --outdir=fastqc_out/clean ::: hocort_out/*.fastq.gz</code></pre>
+<p>Then run the script using
+<code>sbatch run_fastqc_clean.sh</code>.</p>
+</div>
+<div id="b.-outputs-4" class="section level2">
+<h2>5b. Outputs</h2>
+<p>Most metrics should be improved. If failures remain, check the <a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/">FastQC
+documentation</a> to determine the source of the issue and whether any
+additional steps need to be added to the pipeline.</p>
 </div>
 </div>
 <div id="next-step" class="section level1">

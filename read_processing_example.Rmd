@@ -102,7 +102,7 @@ exit. Note that the time is designed for only four read files (two samples).
 #!/bin/bash
 
 #SBATCH --account=def-bfinlay   # Change bfinlay to your professor's username
-#SBATCH --time=01:00:00      # Adjust time as needed
+#SBATCH --time=00:15:00      # Adjust time as needed
 #SBATCH --cpus-per-task=10
 #SBATCH --mem=15G 
 
@@ -112,7 +112,7 @@ mkdir fastqc_out
 
 # Load FastQC and its dependencies - update versions as needed.
 module load StdEnv/2023 fastqc/0.12.1
-# Run FastQC on all forward read files
+# Run FastQC on all read files
 parallel fastqc --outdir=fastqc_out ::: sequences/*.fastq.gz
 ```
 
@@ -326,6 +326,42 @@ origin. These reads were filtered out of the output fastq.gz files.
 Note that the output files are slightly larger than the inputs; this is simply
 because the fastq files were re-zipped by HoCoRT using a different format and is
 not a cause for concern.
+
+# Step 5: Check Quality
+
+We will assess the quality of the cleaned reads and compare the quality to the
+raw reads.
+
+## 5a. Run Code
+
+Start a new script in the project directory by entering
+`nano run_fastqc_clean.sh`. In the script, paste the following and then hit
+Ctrl+S and Ctrl+X to save and exit. Note that the time is designed for only four
+read files (two samples). Run the script using `sbatch run_fastqc_clean.sh`.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+#!/bin/bash  
+
+#SBATCH --account=def-bfinlay   # Change bfinlay to your professor's username #SBATCH --time=00:15:00      # Adjust time as needed 
+#SBATCH --cpus-per-task=10 
+#SBATCH --mem=15G   # Make the folder that will store all fastqc outputs 
+
+mkdir fastqc_out/clean  
+# Load FastQC and its dependencies - update versions as needed
+module load StdEnv/2023 fastqc/0.12.1 
+
+# Run FastQC on all read files 
+parallel fastqc --outdir=fastqc_out/clean ::: hocort_out/*.fastq.gz
+```
+
+Then run the script using `sbatch run_fastqc_clean.sh`.
+
+## 5b. Outputs
+
+Most metrics should be improved. If failures remain, check the [FastQC
+documentation](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) to
+determine the source of the issue and whether any additional steps need to be
+added to the pipeline.
 
 # Next Step
 
