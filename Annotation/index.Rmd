@@ -195,10 +195,12 @@ more information. Here we use the following parameters:
     taxon.
 
 -   **-o metaphlan_out/{}.txt**: Taxonomic annotations will be saved in this
-    folder in txt format.\
-    --nproc \$SLURM_CPUS_PER_TASK: use all the processing power available.\
-    -t rel_ab_w_read_stats: Note that **no metagenomic annotation is perfectly
-    analogous to 16S counts**. However, setting -t (analysis type) to
+    folder in txt format.
+
+-   **--nproc 14**: use nearly all the processing power available.
+
+-   **-t rel_ab_w_read_stats**: Note that **no metagenomic annotation is
+    perfectly analogous to 16S counts**. However, setting -t (analysis type) to
     rel_ab_w_read_stats will give you **pseudo-RPK values**, which can be fed
     into many tools that rely on counts. (differential abundance etc, but be
     careful with diversity metrics). MetaPhlAn by default gives relative
@@ -221,7 +223,7 @@ more information. Here we use the following parameters:
 
 #SBATCH --account=def-bfinlay
 #SBATCH --time=00:30:00
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=15
 #SBATCH --mem=30G
 
 date
@@ -253,13 +255,12 @@ parallel metaphlan sequences/concatenated/{}.fastq.gz \
 --input_type fastq \
 --unclassified_estimation \
 -o metaphlan_out/{}.txt \
---nproc $SLURM_CPUS_PER_TASK \
+--nproc 14 \
 -t rel_ab_w_read_stats \
 --index mpa_vOct22_CHOCOPhlAnSGB_202403 \
 --bowtie2db $SCRATCH/metaphlan_databases \
 --bowtie2out metaphlan_out/bt_out/{}.bowtie2.bz2
 date
-echo "done"
 ```
 
 # **Format the Results**

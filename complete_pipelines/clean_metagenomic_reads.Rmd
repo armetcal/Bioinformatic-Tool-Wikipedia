@@ -1,5 +1,5 @@
 ---
-title: Raw Read Processing Example 
+title: Cleaning Raw Metagenomic Reads
 output:
   html_document:
     #css: "../css/styles.css"
