@@ -22,11 +22,16 @@ disease mechanisms".
 
 The steps covered will include:
 
-1.  Download reads from two samples
-2.  Check the initial quality using FastQC
-3.  Trim and filter reads for quality
-4.  Remove human reads
-5.  Check the final quality using FastQC
+1.  [Download reads from two
+    samples](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/download_reads/index.html)
+2.  [Check the initial quality using
+    FastQC](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html)
+3.  [Trim and filter reads for quality using
+    BBDuk](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/bbduk.html)
+4.  [Remove human reads using
+    HoCoRT](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/hocort.html)
+5.  [Check the final quality using
+    FastQC](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html)
 
 # Step 1: Download Reads
 
