@@ -321,7 +321,10 @@ memory and/or time requests at the top of the script as required.
 
 In the above screenshot, the vast majority of reads did not align with the
 reference genome. Only 0.01% (1/10,000) of reads were detectably of human
-origin. These reads were filtered out of the output fastq.gz files.
+origin. These reads were filtered out of the output fastq.gz files. The low
+number is because these samples were auto-filtered to remove human reads when
+the raw files were uploaded to the online repository (described in the paper's
+supplementary information).
 
 Note that the output files are slightly larger than the inputs; this is simply
 because the fastq files were re-zipped by HoCoRT using a different format and is
@@ -344,7 +347,6 @@ read files (two samples). Run the script using `sbatch run_fastqc_clean.sh`.
 
 #SBATCH --account=def-bfinlay   # Change bfinlay to your professor's username #SBATCH --time=00:15:00      # Adjust time as needed 
 #SBATCH --cpus-per-task=10 
-#SBATCH --mem=15G   # Make the folder that will store all fastqc outputs 
 
 mkdir fastqc_out/clean  
 # Load FastQC and its dependencies - update versions as needed
