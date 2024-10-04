@@ -1,0 +1,22 @@
+---
+title: MAG Assembly and Annotation
+output:
+  html_document:
+    toc: true     
+    toc_depth: 3     
+    toc_float:       
+      collapsed: false       
+      smooth_scroll: false 
+---
+
+# **Background**
+
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+cd $SCRATCH
+# Download the command
+wget https://raw.githubusercontent.com/biobakery/MetaPhlAn/master/metaphlan/utils/merge_metaphlan_tables.py
+# Rename it
+mv merge_metaphlan_tables.py merge_metaphlan_tables_pseudoRPK.py
+```
+
