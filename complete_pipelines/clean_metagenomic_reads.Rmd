@@ -10,7 +10,7 @@ output:
       smooth_scroll: false 
 ---
 
-# Background
+# **Background**
 
 Now that we've gone through each step individually, we will put all of the steps
 together and process two paired-end samples. We will assume that all
@@ -33,7 +33,7 @@ The steps covered will include:
 5.  [Check the final quality using
     FastQC](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html)
 
-# Step 1: Download Reads
+# **Step 1: Download Reads**
 
 Note that the project accession is PRJNA834801, but we will only download two
 reads for this example. It took 41 minutes to download a total of 3.7 GB -
@@ -87,7 +87,7 @@ actual download.)
 
 ![](images/clipboard-2677985302.png){width="457"}
 
-# Step 2: Check Quality
+# **Step 2: Check Quality**
 
 ## 2a. Run Code
 
@@ -173,7 +173,7 @@ Overall, the QC has only demonstrated the necessity of several filtering steps
 that are part of the regular pipeline (ex. adapter trimming). No other problems
 with the library are apparent.
 
-# Step 3: Trim and Filter
+# **Step 3: Trim and Filter**
 
 ## 3a. Run Code
 
@@ -260,7 +260,7 @@ sequences described in the paper's Methods section.
 
 ![](images/clipboard-3680035628.png){width="471"}
 
-# Step 4: Remove Human Reads
+# **Step 4: Remove Human Reads**
 
 Before this step, basic installation of the HoCoRT dependencies should be
 completed as described in the [HoCoRT
@@ -335,7 +335,7 @@ Note that the output files are slightly larger than the inputs; this is simply
 because the fastq files were re-zipped by HoCoRT using a different format and is
 not a cause for concern.
 
-# Step 5: Check Quality
+# **Step 5: Check Quality**
 
 We will assess the quality of the cleaned reads and compare the quality to the
 raw reads.
@@ -370,7 +370,7 @@ documentation](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) to
 determine the source of the issue and whether any additional steps need to be
 added to the pipeline.
 
-# Next Step
+# **Next Step**
 
 At this point, the reads are considered 'clean' and can be annotated.
 

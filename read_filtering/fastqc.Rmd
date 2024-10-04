@@ -102,5 +102,5 @@ containing all the plots in the HTML summary.
 After the initial quality check, adapter sequences (used during the sequencing
 process) will be trimmed from the reads.
 
-[Step 2b: Trimming adapters with
+[Step 3: Trimming adapters with
 BBDuk](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/bbduk.html)

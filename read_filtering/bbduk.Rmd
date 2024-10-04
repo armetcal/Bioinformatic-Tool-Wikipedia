@@ -200,5 +200,5 @@ the BBDuk output:
 After adapter trimming, other contaminant reads should be removed. For gut
 microbiomes, this is usually reads mapping to host DNA.
 
-[Step 2c: Remove human reads with
+[Step 4: Remove human reads with
 HoCoRT](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/hocort.html)

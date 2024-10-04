@@ -172,18 +172,16 @@ hocort map bowtie2 \
 --filter true
 ```
 
-Fastq files with human reads removed will be saved to the hocort_out folder. As
-usual,
-[FastQC](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html)
-can be run on the output samples to see how the quality attributes were
-affected.
+Fastq files with human reads removed will be saved to the hocort_out folder.
 
 # Next Step
+
+As usual,
+[FastQC](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/read_filtering/fastqc.html)
+should be run on the output samples to see how the quality attributes were
+affected.
 
 At this point, the reads have been trimmed to remove adapters and low-quality
 end sequences, filtered to remove monomeric repeats and low-quality reads, and
 all contaminating human reads have been filtered out. We have also checked read
 quality using FastQC. The reads can now be used for downstream analysis!
-
-[Step 3: Taxonomic Annotation with
-MetaPhlAn4](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/annotation)
