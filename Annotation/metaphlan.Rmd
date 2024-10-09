@@ -218,6 +218,10 @@ more information. Here we use the following parameters:
 
 ### Code
 
+If you see memory or time errors in the slurm log file after the code runs,
+increase the relevant requests accordingly, remove any files that were generated
+during the failed run, and resubmmit the job.
+
 ```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
 #!/bin/bash
 
@@ -325,10 +329,10 @@ cd $SCRATCH
 source metaphlan_virenv/env/bin/activate
 
 # Move to your working directory
-cd path/from/scratch
+cd test_pipe2
 
 # Create a new folder that will store all annotations
-mkdir annotations
+#mkdir annotations
 
 # Load the required modules
 # Note: update python version as required. If it’s not the correct version, you will probably see it in the slurm output file.
@@ -347,3 +351,7 @@ column, where the column names match the original file names.
 
 The values in the output tables should match up exactly with the individual .txt
 files - use `nano` to inspect the files if desired.
+
+Here is an example of the delimited text file using pseudo RPK values:
+
+![](images/clipboard-837023170.png)

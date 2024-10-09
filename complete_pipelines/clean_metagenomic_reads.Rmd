@@ -78,14 +78,14 @@ The following code is printed to the console. First there were several error
 messages, which is an artifact of the way SRR.numbers.2 is formatted; however,
 the code then runs normally for the two samples.
 
-![](images/clipboard-2528279973.png){width="322"}
+![](images/clipboard-2528279973.png)
 
 Inspecting our sequences folder using ls -l \*, we see that four fastq.gz files
 have been downloaded, with each one being 1.2-1.6 GB. (Because the reads are
 split into forward/reverse when downloaded, the combined size is larger than the
 actual download.)
 
-![](images/clipboard-2677985302.png){width="457"}
+![](images/clipboard-2677985302.png)
 
 # **Step 2: Check Quality**
 
