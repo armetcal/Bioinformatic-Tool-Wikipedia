@@ -421,4 +421,4 @@ added to the pipeline.
 At this point, the reads are considered 'clean' and can be annotated.
 
 Taxonomic annotation can be performed using
-[MetaPhlAn.](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/Annotation/)
+[MetaPhlAn.](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/Annotation/metaphlan.html)
