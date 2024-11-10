@@ -32,12 +32,6 @@ This protocol is based on
 current version). It consists of the official Compute Canada instructions that
 have been tweaked to make it run with no errors.
 
-## Recommended Clusters
-
-This protocol will work best on clusters whose job nodes have internet access,
-but others should also work perfectly as long as the databases are properly
-installed.
-
 # **Installing MetaPhlAn and Dependencies**
 
 Reference databases are necessary to annotate the taxa.
@@ -86,16 +80,19 @@ scancel job-ID # Add the job ID listed in the squeue output
 
 Lastly, create a new environment called **metaphlan_virenv** where all of the
 MetaPhlAn4 dependencies can be initialized. We will then install Compute
-Canada's MetaPhlAn module into it. **If this step has been done previously, it
-can be skipped.**
+Canada's MetaPhlAn python wheel (similar to a module) into it. **If this step
+has been done previously, it can be skipped.**
 
-The MetaPhlAn module is available on Compute Canada. First check what the most
-up-to-date version of MetaPhlAn is by typing
+The MetaPhlAn python wheel is available on Compute Canada. First check what the
+most up-to-date version of MetaPhlAn is by typing
 `avail_wheels metaphlan --all-versions`. Currently the most recent version is
 4.1.1. This will be inputted into the script below.
 
 ```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
 cd $SCRATCH
+
+# This is a dependency of virtualenv.
+module load python/3.11
 
 # Generate a virtual environment
 virtualenv --no-download metaphlan_virenv/env

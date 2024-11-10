@@ -1,0 +1,175 @@
+---
+title: Functional Annotation with HUMAnN
+output:
+  html_document:
+    toc: true     
+    toc_depth: 3     
+    toc_float:       
+      collapsed: false       
+      smooth_scroll: false 
+---
+
+# **Background**
+
+HUMAnN was developed by the Huttenhower, Franzosa, and Segata labs and is
+designed to functionally annotate metagenomic reads. The current release is
+v3.0.
+
+The following uses the [official HUMAnN
+documentation](https://github.com/biobakery/biobakery/wiki/humann3) that has
+been modified to work in Compute Canada.
+
+# Installation
+
+First, create a new environment called **humann_virenv** where all of the HUMAnN
+dependencies can be initialized. We will then install Compute Canada's HUMAnN
+module into it. **If this step has been done previously, it can be skipped.**
+
+We will install the HUMAnN python wheel (similar to a module) which is available
+on Compute Canada, and will then download the necessary reference databases
+using HUMAnN-specific commands.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+cd $SCRATCH
+
+# This is a dependency of virtualenv.
+module load python/3.11
+
+# Generate a virtual environment
+virtualenv --no-download humann_virenv/env
+source humann_virenv/env/bin/activate
+
+# Install metaphlan and its dependencies
+pip install --no-index --find-links=$EBROOTWHEELS humann
+
+# Test installation
+humann_test
+
+# Install (or update) and extract databases ~~~~~~~~~~~~
+
+mkdir humann_databases
+
+# Pangenome (i.e. taxonomy)
+humann_databases --download chocophlan full humann_databases --update-config yes
+# Proteins
+humann_databases --download uniref uniref90_diamond humann_databases --update-config yes
+# Functional Annotations
+humann_databases --download utility_mapping full humann_databases --update-config yes
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Deactivate the environment
+deactivate
+```
+
+# **Prep Data: Concatenate Reads**
+
+If this has already been performed for MetaPhlAn, there is no need to rerun the
+concatenation.
+
+Note that the following simply pastes the reverse reads after the forward reads.
+Some tools require that the reads are 'interleaved' (i.e. paired reads remain
+next to each other), but this is not necessary here.
+
+It is computationally expensive, so we will submit a job. Start a new script in
+the **project directory** by entering `nano run_concat.sh`. In the script, paste
+the following and then hit Ctrl+S and Ctrl+X to save and exit. Note that the
+time is designed for only four read files (two samples). Run the script using
+`sbatch run_concat.sh`.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+#!/bin/bash
+
+#SBATCH --account=def-bfinlay
+#SBATCH --time=00:15:00
+#SBATCH --cpus-per-task=10
+#SBATCH --mem=15G
+
+# Store concatenated reads here
+mkdir sequences/concatenated
+
+# Concatenate
+ls hocort_out/*_1.fastq.gz | sed 's/hocort_out\///; s/_1.fastq.gz//' | parallel 'zcat hocort_out/{}_1.fastq.gz hocort_out/{}_2.fastq.gz | gzip > sequences/concatenated/{}.fastq.gz'
+```
+
+# Run HUMAnN
+
+Start a new script in the project directory by entering `nano run_humann.sh`. In
+the script, paste the script below, and then hit Ctrl+S and Ctrl+X to save and
+exit. Note that the time is designed for only four read files (two samples). Run
+the script using `sbatch run_humann.sh`.
+
+HUMAnN takes a long time to run. Consider running multiple batches of samples in
+parallel using multiple scripts to save time.
+
+Note: **EDIT THE FILE PATHS AS NEEDED.**
+
+### Additional Notes
+
+There are many settings for HUMAnN - check the official documentation for more
+information. Here are some key parameters:
+
+-   **--metaphlan-options**: HUMAnN uses MetaPhlAn as part of its annotation
+    pipeline. Options that are specified in MetaPhlAn ([see
+    tutorial](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/Annotation/metaphlan.html))
+    are listed sequentially in double quotes.
+
+-   **--memory-use maximum**: HUMAnN will otherwise default to using half the
+    available memory.
+
+-   **--remove-stratified-output**: by default, HUMAnN returns functions that
+    are stratified by taxonomy. Removing the stratification is faster and the
+    results are more typical for most analyses; however, keep in mind that the
+    stratified data can provide useful information as it demonstrates a
+    connection between taxonomy and function. Remove this line if unsure.
+
+-   --threads=37: This will ensure that the majority of CPUs requested will be
+    used, reducing run time. Note that a few CPUs are conserved for additional
+    miscellaneous processes.
+
+-   date (before each sample): Prints current time, useful for estimating how
+    much time is required per sample
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+#!/bin/bash
+
+#SBATCH --account=def-bfinlay
+#SBATCH --time=04:00:00
+#SBATCH --cpus-per-task=40
+#SBATCH --mem=90G
+
+date
+# Move to the scratch
+cd $SCRATCH
+
+# Activate the virtual environment
+source humann_virenv/env/bin/activate
+
+# Move to your working directory
+cd test_pipe2
+
+# Initialize save directories
+mkdir humann_out
+
+# Load modules
+module load gcc blast samtools bedtools bowtie2 diamond python/3.11
+
+# Run HUMAnN
+for file in sequences/concatenated/*.fastq.gz; do
+  date
+  sample=$(basename "$file" ".fastq.gz")  # Extracts the sample name
+humann \
+ --input sequences/concatenated/"${sample}.fastq.gz" \
+ --output humann_out \
+ --output-basename "${sample}" \
+ --nucleotide-database $SCRATCH/humann_databases/chocophlan \
+ --protein-database $SCRATCH/humann_databases/uniref \
+ --metaphlan-options="-t=rel_ab --index=mpa_vOct22_CHOCOPhlAnSGB_202403 --bowtie2db=$SCRATCH/metaphlan_databases" \
+ --memory-use maximum \
+ --remove-stratified-output \
+ --threads=37 \
+ --verbose
+done
+```
+
+# Outputs
