@@ -1488,6 +1488,9 @@ font-size: 0.95em;
 </div>
 
 
+<p>**Note: MetaPhlAn is part of the HUMAnN package installed in the
+humann.Rmd script. One or both scripts need to be updated to just use
+the HUMAnN installation, creating an ‘annotation’ pipeline.</p>
 <div id="background" class="section level1">
 <h1><strong>Background</strong></h1>
 <p>MetaPhlAn was developed by the Huttenhower lab and is designed to
@@ -1543,6 +1546,11 @@ squeue -u armetcal # This prints your active jobs</code></pre>
 dependencies can be initialized. We will then install Compute Canada’s
 MetaPhlAn module into it. <strong>If this step has been done previously,
 it can be skipped.</strong></p>
+<p>The MetaPhlAn module is available on Compute Canada. First check what
+the most up-to-date version of MetaPhlAn is by typing
+<code>avail_wheels metaphlan --all-versions</code>. Currently the most
+recent version is 4.1.1. This will be inputted into the script
+below.</p>
 <pre class="bash"><code>cd $SCRATCH
 
 # Generate a virtual environment
@@ -1623,21 +1631,12 @@ ls hocort_out/*_1.fastq.gz | sed &#39;s/hocort_out\///; s/_1.fastq.gz//&#39; | p
 </div>
 <div id="run-metaphlan" class="section level1">
 <h1><strong>Run MetaPhlAn</strong></h1>
-<div id="background-1" class="section level3">
-<h3>Background</h3>
-<p>The MetaPhlAn module is available on Compute Canada, and so does not
-need to be separately installed (aside from the databases downloaded
-above). First check what the most up-to-date version of MetaPhlAn is by
-typing <code>avail_wheels metaphlan --all-versions</code>. Currently the
-most recent version is 4.1.1. This will be inputted into the script
-below.</p>
 <p>Start a new script in the project directory by entering
 <code>nano run_metaphlan4.sh</code>. In the script, paste the script
 below, and then hit Ctrl+S and Ctrl+X to save and exit. Note that the
 time is designed for only four read files (two samples). Run the script
 using <code>sbatch run_metaphlan4.sh</code>.</p>
 <p>Note: <strong>EDIT THE FILE PATHS AS NEEDED.</strong></p>
-</div>
 <div id="additional-notes" class="section level3">
 <h3>Additional Notes</h3>
 <p>There are many settings for metaphlan - check the official

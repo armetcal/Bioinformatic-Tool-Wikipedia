@@ -9,46 +9,96 @@ output:
       smooth_scroll: false
 ---
 
-# Choosing a compute cluster
+# Compute Cluster
 
-Compute Canada has a variety of clusters to choose from, all with varying
-parameters. Parameters include internet access on the computational nodes, the
-amount of resources that can be requested, etc.
-
-**Dowloading reads can take a very long time**, depending on the files, and
-therefore it is often convenient to [submit a
-job](https://docs.alliancecan.ca/wiki/Running_jobs) rather than perform the
-download interactively (line by line in the console).
+**Dowloading reads can take a very long time.** Compute Canada has a variety of
+clusters to choose from, all with varying parameters, such as the amount of
+resources that can be requested. Computational nodes do not generally have
+internet access, so downloads must be run interactively. It is therefore
+recommended to run the downloads overnight with a stable internet connection.
 
 Different clusters have different ways they want you to download data. For
 Beluga, we can see from [the
 wiki](https://docs.alliancecan.ca/wiki/B%C3%A9luga/en) that they want us to use
-the login (default) node to download files, as the node name is the same. This
-means that you must log in and download files interactively without requesting
-any computational resources. **If using login nodes, do NOT run more than two
-parallel processes at a time!**
+the login (default) node to download files, as the node name is the same.
 
 ![](beluga_nodes.png)
 
-Whereas for Graham, the node is different. Be sure to check that you are using
-the correct nodes for your cluster:
+Whereas for Graham, the node is different. These nodes can be accessed in the
+same manner as the login node. Be sure to check that you are using the correct
+nodes for your cluster:
 
 ![](graham_nodes.png)
 
-**This protocol will be most convenient to run on clusters whose job nodes have
-internet access, such as Cedar** – otherwise you will have to run the commands
-interactively (without a .sh script) or use a different workaround. **This
-protocol was troubleshot on Beluga**, which doesn’t have internet access.
-**Graham** is not a good choice as the job nodes don’t have internet access, but
-the RAM available in the login nodes is inadequate.
+**This protocol was troubleshot on Beluga and Graham**. For our lab, Graham has
+a much higher storage capacity, and so it is convenient to download all the
+reads from a study into this cluster and transfer files as needed (see below).
+Anecdotally, Graham downloaded much faster when using Method 1 (wget), but
+Graham does not have as much memory available in the login nodes and it can
+therefore be difficult to install all the necessary packages for a given
+pipeline. Graham is not a good choice for the other two methods listed below due
+to this issue.
 
 **You can easily transfer data between clusters using the Globus utility tool**,
-so if your downstream tools are installed on a cluster without internet access,
-it may be worth downloading the files on Cedar etc. using a script and then
-transferring them afterward. That way your computer doesn’t have to stay
-connected to the server for the entire download.
+so it may be convenient to download reads using Graham and then transfer files
+to Beluga for processing.
 
-# **Recommended Method: SRA Toolkit**
+# **Method 1: ENA Browser**
+
+ENA, the European Nucleotide Archive, is a very commonly-used database for
+sequencing data. If a study is listed on NCBI or another database, it is likely
+to also be present in ENA. Unlike NCBI, ENA offers a very direct and convenient
+downloading method using wget, which requires no installation.
+
+Depending on file size (1-4 Gb) and internet connection, downloads took 1-20
+minutes per file.
+
+Using project **PRJNA834801** as an example, its homepage on ENA lists all
+sequencing files below the project information. Click Download All to download a
+.sh file that contains wget commands for every file.
+
+![](images/clipboard-2884308538.png)
+
+The .sh file commands will be in the following format. `-nc` means 'no clobber',
+meaning that it will skip the file if a file of the same name is already in the
+directory. If you are redownloading files, **be sure to delete the original
+copies** or use the -O parameter to overwrite it.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR190/076/SRR19064776/SRR19064776_2.fastq.gz
+wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR190/077/SRR19064777/SRR19064777_1.fastq.gz
+wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR190/078/SRR19064778/SRR19064778_2.fastq.gz
+```
+
+Simply go to the directory where the raw reads will be stored and then
+copy/paste the contents of the .sh file into the console.
+
+Once all files have been downloaded, check that you have the expected number of
+files using the `ls -1 | wc -l` command. Remember to subtract any log files from
+the final number (or simply delete them first).
+
+## Important Notes
+
+Firstly, the order of the wget commands is **not in alphanumerical order**. If
+the order is important (separating paired reads into batches, etc), be sure to
+sort the .sh file beforehand.
+
+Secondly, it is common for the **internet connection to be lost** (unstable
+connection, laptop goes into sleep mode, etc). In this case, the program will
+automatically make a wget log text file. Opening it with the `nano` command will
+tell you which sample was interrupted; inspection of the console output should
+give the same information. Luckily, interrupted downloads can be restarted by
+simply changing `-nc` to `-c` ("continue"). Then repaste the interrupted wget
+command as well as any subsequent wget commands.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+# The first line will continue the download from the point at which it left off.
+wget -c ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR190/076/SRR19064776/SRR19064776_2.fastq.gz
+wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR190/077/SRR19064777/SRR19064777_1.fastq.gz
+wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR190/078/SRR19064778/SRR19064778_2.fastq.gz
+```
+
+# Method 2: SRA Toolkit
 
 This method works for all file sizes, does not require new installations, and is
 reasonably fast.
@@ -93,30 +143,12 @@ module load sra-toolkit/3.0.9 # This must be run every time CC restarts
 cat filtered_accession_list.txt | parallel -j 2 fastq-dump --split-files --origfmt --gzip {}
 ```
 
-# Optional: Move forward reads into a separate folder
+# Method 3: ENA File Downloader
 
-Many programs (such as MetaPhlAn) only use the forward reads, and so it is often
-convenient to divide the reads into separate folders.
-
-```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
-# Navigate to your sequences folder
-cd scratch/path/to/sequences
-
-# Create forward and reverse directories
-mkdir fwd_reads
-mkdir rev_reads
-
-# Bin the reads
-mv *_1.fastq.gz fwd_reads
-mv *_2.fastq.gz rev_reads
-```
-
-# Alternative Method: ENA File Downloader
-
-This method is less useful because it only works for files under 5 GB, is
-slightly less easy to use, and can't be run on Cedar without requesting
-resources as it requires \>15GB RAM. One benefit is that the program is able to
-email you once the downloads have finished.
+This method is less useful because it only works for files under 5 GB, is less
+easy to use, and can't be run on Cedar without requesting resources as it
+requires \>15GB RAM. One benefit is that the program is able to email you once
+the downloads have finished.
 
 ## Part 1: Setup (First time only)
 

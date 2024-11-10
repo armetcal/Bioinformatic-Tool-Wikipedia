@@ -9,6 +9,10 @@ output:
       smooth_scroll: false 
 ---
 
+\*\*Note: MetaPhlAn is part of the HUMAnN package installed in the humann.Rmd
+script. One or both scripts need to be updated to just use the HUMAnN
+installation, creating an 'annotation' pipeline.
+
 # **Background**
 
 MetaPhlAn was developed by the Huttenhower lab and is designed to taxonomically
@@ -84,6 +88,11 @@ Lastly, create a new environment called **metaphlan_virenv** where all of the
 MetaPhlAn4 dependencies can be initialized. We will then install Compute
 Canada's MetaPhlAn module into it. **If this step has been done previously, it
 can be skipped.**
+
+The MetaPhlAn module is available on Compute Canada. First check what the most
+up-to-date version of MetaPhlAn is by typing
+`avail_wheels metaphlan --all-versions`. Currently the most recent version is
+4.1.1. This will be inputted into the script below.
 
 ```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
 cd $SCRATCH
@@ -168,14 +177,6 @@ ls hocort_out/*_1.fastq.gz | sed 's/hocort_out\///; s/_1.fastq.gz//' | parallel 
 ```
 
 # **Run MetaPhlAn**
-
-### Background
-
-The MetaPhlAn module is available on Compute Canada, and so does not need to be
-separately installed (aside from the databases downloaded above). First check
-what the most up-to-date version of MetaPhlAn is by typing
-`avail_wheels metaphlan --all-versions`. Currently the most recent version is
-4.1.1. This will be inputted into the script below.
 
 Start a new script in the project directory by entering
 `nano run_metaphlan4.sh`. In the script, paste the script below, and then hit
