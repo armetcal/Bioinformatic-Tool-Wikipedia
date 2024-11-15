@@ -224,11 +224,10 @@ during the failed run, and resubmmit the job.
 #!/bin/bash
 
 #SBATCH --account=def-bfinlay
-#SBATCH --time=00:30:00
-#SBATCH --cpus-per-task=15
-#SBATCH --mem=30G
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=40G
 
-date
 # Move to the scratch
 cd $SCRATCH
 
@@ -261,7 +260,7 @@ parallel metaphlan sequences/concatenated/{}.fastq.gz \
 -t rel_ab_w_read_stats \
 --index mpa_vOct22_CHOCOPhlAnSGB_202403 \
 --bowtie2db $SCRATCH/metaphlan_databases \
---bowtie2out metaphlan_out/bt_out/{}.bowtie2.bz2
+--bowtie2out metaphlan_out/bt_out/{}.bowtie2.txt
 date
 ```
 
@@ -353,3 +352,13 @@ files - use `nano` to inspect the files if desired.
 Here is an example of the delimited text file using pseudo RPK values:
 
 ![](images/clipboard-837023170.png)
+
+# Next Step
+
+Annotated read counts can be exported, added to a phyloseq object, and analyzed
+in R.
+
+If performing [functional
+annotation](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/Annotation/humann.html)
+of the reads, the taxonomy tables generated here can be used as input for the
+HUMAnN pipeline, greatly reducing the run time.

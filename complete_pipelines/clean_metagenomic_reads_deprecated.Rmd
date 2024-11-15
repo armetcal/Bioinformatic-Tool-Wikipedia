@@ -45,8 +45,7 @@ computer does not disconnect from the server while the code is running.
 ## Preparation
 
 The accession was searched on the ENA browser and all FTP download commands were
-downloaded as explained in the tutorial linked above. The wget commands for two
-random samples, SRR19065033 and SRR19064990, were isolated.
+downloaded as explained in the tutorial linked above.
 
 ## 1a. Run Code
 
@@ -58,21 +57,41 @@ mkdir scratch/test_pipe2/sequences
 # Go to the sequences directory
 cd scratch/test_pipe2/sequences
 
-wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR190/033/SRR19065033/SRR19065033_1.fastq.gz
-wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR190/033/SRR19065033/SRR19065033_2.fastq.gz
+# Accession
+project="PRJNA834801"
 
-wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR190/090/SRR19064990/SRR19064990_1.fastq.gz
-wget -nc ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR190/090/SRR19064990/SRR19064990_2.fastq.gz
+# Load the SRA Toolkit
+module load sra-toolkit/3.0.9
+
+# Make a list of all fastq files associated with the project, save the file accessions to a list (SRR.numbers), and download them.
+# -j 2 means 2 processes at a time.
+# IF YOU ARE RUNNING THIS IN A LOGIN NODE, DO NOT INCREASE J. If you're submitting it to a computational node, you can remove the "-j 2".
+esearch -db sra -query $project | efetch -format runinfo > runinfo.csv
+cat runinfo.csv | cut -d "," -f 1 > SRR.numbers
+
+# Select first three lines (2 samples) ~~~~~~~~~~~~~~~~~
+# Note: overwriting doesn't work.
+head -n 3 SRR.numbers > SRR.numbers.2
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Download reads
+cat SRR.numbers.2 | parallel -j 2 fastq-dump --split-files --origfmt --gzip {}
 ```
 
 ## 1b. Outputs
+
+The following code is printed to the console. First there were several error
+messages, which is an artifact of the way SRR.numbers.2 is formatted; however,
+the code then runs normally for the two samples.
+
+![](images/clipboard-2528279973.png)
 
 Inspecting our sequences folder using ls -l \*, we see that four fastq.gz files
 have been downloaded, with each one being 1.2-1.6 GB. (Because the reads are
 split into forward/reverse when downloaded, the combined size is larger than the
 actual download.)
 
-![](images/clipboard-2377096828.png)
+![](images/clipboard-2677985302.png)
 
 # **Step 2: Check Quality**
 
@@ -173,9 +192,9 @@ script using `sbatch run_bbduk.sh`.
 #!/bin/bash
 
 #SBATCH --account=def-bfinlay   # Change bfinlay to your professor's username
-#SBATCH --time=01:00:00     
-#SBATCH --cpus-per-task=20
-#SBATCH --mem=50G 
+#SBATCH --time=00:15:00      # These samples should only take ~7 minutes total
+#SBATCH --cpus-per-task=10
+#SBATCH --mem=25G 
 
 # Load the dependencies
 module load StdEnv/2023 bbmap/39.06 java/21.0.1
@@ -184,23 +203,61 @@ module load StdEnv/2023 bbmap/39.06 java/21.0.1
 mkdir bbduk_out
 mkdir bbduk_out/stats
 
-# Allow overwrite of default memory usage
-unset JAVA_TOOL_OPTIONS
+# Trim and filter, all in one step
+# First we read in all the unique sequencing file names, then pull out 
+# the sample names, and then read them through our bbduk.sh pipeline.
+# {} acts as a placeholder for the sample names.
+ls sequences/*_1.fastq.gz | sed 's/sequences\///; s/_1.fastq.gz//' | parallel bbduk.sh \
+in=sequences/{}_1.fastq.gz \
+in2=sequences/{}_2.fastq.gz \
+out=bbduk_out/{}_1.fastq.gz \
+out2=bbduk_out/{}_2.fastq.gz \
+outm=bbduk_out/{}_removed.fastq.gz \
+stats=bbduk_out/stats/{}_stats.txt \
+tpe tbo qtrim=rl trimq=25 maq=25 minlen=50 ref=adapters,phix \
+-Xmx20g
+```
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+#!/bin/bash
+
+#SBATCH --account=def-bfinlay   # Change bfinlay to your professor's username
+#SBATCH --time=00:15:00      # These samples should only take ~7 minutes total
+#SBATCH --cpus-per-task=10
+#SBATCH --mem=25G 
+
+# Load the dependencies
+module load StdEnv/2023 bbmap/39.06 java/21.0.1
+
+# Make the output directories
+mkdir bbduk_out
+mkdir bbduk_out/stats
 
 # Trim and filter, all in one step
 # First we read in all the unique sequencing file names, then pull out 
 # the sample names, and then read them through our bbduk.sh pipeline.
-# {sample} acts as a placeholder for the sample names.
+# {} acts as a placeholder for the sample names.
+ls sequences/*_1.fastq.gz | sed 's/sequences\///; s/_1.fastq.gz//' | bbduk.sh \
+in=sequences/{}_1.fastq.gz \
+in2=sequences/{}_2.fastq.gz \
+out=bbduk_out/{}_1.fastq.gz \
+out2=bbduk_out/{}_2.fastq.gz \
+outm=bbduk_out/{}_removed.fastq.gz \
+stats=bbduk_out/stats/{}_stats.txt \
+tpe tbo qtrim=rl trimq=25 maq=25 minlen=50 ref=adapters,phix \
+-Xmx20g
+
+# USE THIS ONE
+unset JAVA_TOOL_OPTIONS
 for file in sequences/*_1.fastq.gz; do
   sample=$(basename "$file" "_1.fastq.gz")  # Extracts the sample name
   bbduk.sh \
     in=sequences/"${sample}_1.fastq.gz" \
     in2=sequences/"${sample}_2.fastq.gz" \
-    out=bbduk_out/"${sample}_1.fastq.gz" \
-    out2=bbduk_out/"${sample}_2.fastq.gz" \
-    stats=bbduk_out/stats/"${sample}_stats.txt" \
+    out=bbduk_out2/"${sample}_1.fastq.gz" \
+    out2=bbduk_out2/"${sample}_2.fastq.gz" \
+    stats=bbduk_out2/stats/"${sample}_stats.txt" \
     tpe tbo qtrim=rl trimq=25 maq=25 minlen=50 ref=adapters,phix \
-    entropy=0.01 \
     -Xmx45g
 done
 ```
@@ -208,11 +265,11 @@ done
 ### Important: check for success
 
 Because output files are initialized and then continuously modified as the code
-runs, it is not possible to tell from the files that the run was successful.
-**The first thing we should inspect is therefore the run log.** Compute Canada
-jobs schedule jobs using 'slurm' software, meaning that every script submitted
-will generate a slurm file of the format **slurm-jobID.out**, where jobID is an
-8 digit number. Recent jobs will have bigger numbers.
+runs, it is not possible to tell from the files that the run was successful. The
+first thing we should inspect is therefore the run log. Compute Canada jobs
+schedule jobs using 'slurm' software, meaning that every script submitted will
+generate a slurm file of the format **slurm-jobID.out**, where jobID is an 8
+digit number. Recent jobs will have bigger numbers.
 
 When we inspect the slurm file using `nano slurm-jobID.out`, we should see a
 complete print out for **each** of the samples. First we see information about
@@ -223,76 +280,28 @@ removed. In the bbduk_out folder, the output files should be roughly
 proportionally smaller than the raw read inputs. This can be printed to screen
 using `ls -l *.fastq.gz`.
 
-![](images/clipboard-280842847.png){width="473"}
+![](images/clipboard-2355088082.png){width="562"}
 
 It is very common for BBDuk to fail because of inadequate memory. If this
-happens, **you will not see a red summary for every sample; instead, the output
-will abruptly stop. In addition, a stats file will not be generated for the
-affected sample.** An example is shown below in yellow: here it reports an
-**oom_kill** event, or 'out of memory' kill event where the job is terminated
-due to inadequate memory allocation. Simply increase the amount of memory
-requested in the job (`#SBATCH --mem=50G`) and/or the bbduk function
-(`-Xmx45g`). The function memory should always be slightly less than the job
-memory.
+happens, you will not see a red summary for every sample; instead, the output
+will abruptly stop as seen below in yellow. Here it reports an **oom_kill**
+event, or 'out of memory' kill event where the job is terminated due to
+inadequate memory allocation. Simply increase the amount of memory requested in
+the job (`#SBATCH --mem=25G`) and/or the bbduk function (`-Xmx20g`). The
+function memory should always be slightly less than the job memory.
 
 ![](images/clipboard-2407697753.png){width="558"}
 
-#### Order of Operations
-
-1.  Check slurm output: `nano slurm-jobID.out`
-
-    1.  Check that there are no obvious errors & samples have red summaries
-
-2.  Check the number of fastq and stats output files: `ls -1 | wc -l`
-
-    1.  Paired-end reads: should be **equal number of input and output fastq
-        files, 2x as many output fastq files as stats files**
-
-    2.  Remember to subtract any other files from counts (slurm files, etc)
-
-3.  If there are fewer stats files:
-
-    1.  Recheck slurm file to see if samples are failing due to inadequate
-        memory. If so, increase `--mem=50G` and `-Xmx45g`.
-
-    2.  Otherwise, run following **one piece at a time**:
-
-```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
-# In bbduk_out folder:
-
-# List sample IDs from the FASTQ files
-fastq_samples=$(ls *_1.fastq.gz | sed 's|.*/||; s/_1.fastq.gz//')
-# List sample IDs from the stats files
-stats_samples=$(ls stats/*_stats.txt 2>/dev/null | sed 's|.*/||; s/_stats.txt//')
-
-# Compare the lists to find sample IDs in FASTQ but not in stats
-comm -23 <(echo "$fastq_samples" | sort) <(echo "$stats_samples" | sort) > missing_stats_samples.txt
-
-# Create a copy of the bbduk script, but run this instead of the for...done loop 
-# Then recheck the outputs as described above
-while read -r sample; do
-bbduk.sh \
-in=sequences/"${sample}_1.fastq.gz" \
-in2=sequences/"${sample}_2.fastq.gz" \
-out=bbduk_out/"${sample}_1.fastq.gz" \
-out2=bbduk_out/"${sample}_2.fastq.gz" \
-stats=bbduk_out/stats/"${sample}_stats.txt" \
-tpe tbo qtrim=rl trimq=25 maq=25 minlen=50 ref=adapters,phix \
-entropy=0.01 \
--Xmx45g
-done < missing_stats_samples.txt
-
-#If the samples still aren't working, there was likely an error when the samples were originally downloaded.
-# Delete the raw fastq files that correspond to the failed samples, redownload just the failed samples, and then rerun bbduk using the copy of the bbduk script (so that bbduk is only rerun on the failed samples).
-```
-
 ## 3b. Outputs
 
-There are two main outputs. The first are the filtered and trimmed files; as
+There are three main outputs. The first are the filtered and trimmed files; as
 described above, these files will be smaller than the raw read inputs in a
 manner that is roughly proportional to the amount of data removed.
 
-Secondly, each file in the `stats` subfolder contains a summary of the sequences
+The second output are the `*removed.fastq.gz` files, one for each sample. These
+will contain any reads that were filtered out.
+
+Lastly, each file in the `stats` subfolder contains a summary of the sequences
 that were filtered out of the reads. The sequences were specified by the `-ref`
 command in the `bbduk.sh` function. In this case, we filtered out PhiX
 contaminant sequences and adapters. The stats file tells us that 3.8% of the
@@ -332,7 +341,7 @@ script using `sbatch run_hocort.sh`.
 #!/bin/bash
 
 #SBATCH --account=def-bfinlay   # Change bfinlay to your professor's username
-#SBATCH --time=01:00:00      # Adjust time as needed
+#SBATCH --time=24:00:00      # Adjust time as needed
 #SBATCH --cpus-per-task=40
 #SBATCH --mem=90G
 
@@ -346,7 +355,6 @@ source activate hocort
 # -x gives the index (compiled in Stage 1)
 # For paired sequences, give 2 inputs and 2 outputs
 # --filter true will give us anything that doesn't match the index (all non-human reads in this case)
-# --threads=37 allows the use of almost all of the 40 CPUs requested in the job.
 for file in bbduk_out/*_1.fastq.gz; do
   sample=$(basename "$file" "_1.fastq.gz")  # Extracts the sample name
   hocort map bowtie2 \
@@ -356,6 +364,40 @@ for file in bbduk_out/*_1.fastq.gz; do
     --filter true
     --threads=37
 done
+```
+
+```{r}
+# List sample IDs from the FASTQ files
+already_run=$(ls hocort_out/*_1.fastq.gz | sed 's|.*/||; s/_1.fastq.gz//')
+# List sample IDs from the stats files
+all_samples=$(ls bbduk_out/*_1.fastq.gz | sed 's|.*/||; s/_1.fastq.gz//')
+# Compare the lists to find sample IDs in FASTQ but not in stats
+comm -23 <(echo "$all_samples" | sort) <(echo "$already_run" | sort) > missing_hocort_samples.txt
+```
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+#!/bin/bash
+
+#SBATCH --account=def-bfinlay   # Change bfinlay to your professor's username
+#SBATCH --time=24:00:00      # Adjust time as needed
+#SBATCH --cpus-per-task=40
+#SBATCH --mem=90G
+
+# Activate the hocort environment
+source activate hocort
+
+# Run tool on paired-end, adapter-trimmed sequences
+# -x gives the index (compiled in Stage 1)
+# For paired sequences, give 2 inputs and 2 outputs
+# --filter true will give us anything that doesn't match the index (all non-human reads in this case)
+while read -r sample; do
+  hocort map bowtie2 \
+    -x $SCRATCH/test_pipe2/index/human.index \
+    -i bbduk_out/"${sample}_1.fastq.gz" bbduk_out/"${sample}_2.fastq.gz" \
+    -o hocort_out/"${sample}_1.fastq.gz" hocort_out/"${sample}_2.fastq.gz" \
+    --filter true
+    --threads=37
+done < missing_hocort_samples.txt
 ```
 
 ## 4b. Outputs
@@ -381,12 +423,57 @@ Note that the output files are slightly larger than the inputs; this is simply
 because the fastq files were re-zipped by HoCoRT using a different format and is
 not a cause for concern.
 
-# **Step 5: Check Quality**
+# Step 5: Remove Low-Quality Reads
+
+While Step 3 removed reads that matched non-target DNA (adapters, etc), this
+code removes reads that are low (quality (short, inaccurate base calls, etc).
+This could theoretically be combined with Step 3, but are kept separate here
+because Step 3 is already prone to failure due to high memory load.
+
+## 5a. Run Code
+
+Start a new script in the project directory by entering
+`nano run_bbduk_entropy.sh`. In the script, paste the following and then hit
+Ctrl+S and Ctrl+X to save and exit. Note that the time is designed for only four
+read files (two samples). Run the script using `sbatch run_bbduk_entropy.sh`.
+
+If a copy of the removed sequences is desired, saveit in fastq.gz format using
+the `outm` parameter in the bbduk command.
+
+```{bash, eval=FALSE, warning=FALSE, include=T, results='hide'}
+#!/bin/bash
+
+#SBATCH --account=def-bfinlay   # Change bfinlay to your professor's username
+#SBATCH --time=00:15:00      # These samples should only take ~7 minutes total
+#SBATCH --cpus-per-task=10
+#SBATCH --mem=25G 
+
+# Load the dependencies
+module load StdEnv/2023 bbmap/39.06 java/21.0.1
+
+# Make the output directories
+mkdir bbduk_out/entropy
+
+# entropy=0.01 will remove monomeric repeats
+unset JAVA_TOOL_OPTIONS
+for file in sequences/*_1.fastq.gz; do
+  sample=$(basename "$file" "_1.fastq.gz")  # Extracts the sample name
+  bbduk.sh \
+    in=hocort_out/"${sample}_1.fastq.gz" \
+    in2=hocort_out/"${sample}_2.fastq.gz" \
+    out=bbduk_out/entropy/"${sample}_1.fastq.gz" \
+    out2=bbduk_out/entropy/"${sample}_2.fastq.gz" \
+    entropy=0.01 \
+    -Xmx20g
+done
+```
+
+# **Step 6: Check Quality**
 
 We will assess the quality of the cleaned reads and compare the quality to the
 raw reads.
 
-## 5a. Run Code
+## 6a. Run Code
 
 Start a new script in the project directory by entering
 `nano run_fastqc_clean.sh`. In the script, paste the following and then hit
@@ -409,7 +496,7 @@ parallel fastqc --outdir=fastqc_out/clean ::: hocort_out/*.fastq.gz
 
 Then run the script using `sbatch run_fastqc_clean.sh`.
 
-## 5b. Outputs
+## 6b. Outputs
 
 Most metrics should be improved. If failures remain, check the [FastQC
 documentation](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) to
@@ -421,4 +508,4 @@ added to the pipeline.
 At this point, the reads are considered 'clean' and can be annotated.
 
 Taxonomic annotation can be performed using
-[MetaPhlAn.](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/Annotation/metaphlan.html)
+[MetaPhlAn.](https://armetcal.github.io/Bioinformatic-Tool-Wikipedia/Annotation/)
