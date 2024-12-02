@@ -1,0 +1,147 @@
+---
+title: "1. Create phyloseq object"
+author: "Avril Metcalfe-Roach"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Background
+
+Phyloseq objects are a convenient way to store microbial sequencing data. At a
+minimum, they typically include three sheets of data:
+
+1.  An OTU (Operational Taxonomic Unit) table ("otu_table")
+
+    1.  OTUs are the highest available taxonomic resolution (often a string of
+        all the taxonomic assignments from Kingdom to Species)
+
+    2.  Samples and OTUs make up the column and row names, and the counts for
+        each sample/OTU make up the values
+
+2.  A taxonomy table ("tax_table")
+
+    1.  For each OTU (row names), the taxonomy is delineated across the columns
+        (typically Kingdom:Species, though this convention isn't enforced)
+
+3.  A metadata (sample data) table ("sam_data", "sample_data")
+
+    1.  Sample names are rows and metadata are in columns.
+
+Phyloseq objects are commonly used as input for a variety of microbiome
+analyses.
+
+# Part 1: Load packages and download data
+
+We will use Wallen et. al (2022), a Parkinson's disease dataset, for our
+tutorials.
+
+Download the source data into your tutorial folder:
+<https://zenodo.org/records/7246185> Keep the name of the file as
+`Source_Data_24Oct2022.xlsx` (or change and update the file name across the
+tutorial scripts).
+
+```{r}
+# Load packages:
+library(tidyverse)
+library(phyloseq)
+library(readxl) # Should have downloaded alongside the tidyverse package
+
+# Copy the file path to the source data here (this will make subsequent coding easier)
+# Include the name of the file as shown below.
+filepath = "C:/path/to/Source_Data_24Oct2022.xlsx"
+```
+
+# Part 2: Create objects
+
+We will load all of the necessary data tables from the data file.
+
+## 2a: Metadata
+
+The metadata will be the same for both taxonomic and functional datasets.
+
+FYI: the sample order MUST be identical to the order in the OTU tables. The
+order is the same here, but you may occasionally encounter errors in other
+datasets.
+
+```{r}
+meta = read_excel(filepath, sheet = "subject_metadata") 
+View(meta)
+meta = meta %>% 
+  column_to_rownames('sample_name') %>% 
+  sample_data() # This turns it into a phyloseq-compatible format.
+```
+
+## 2b: Taxonomy
+
+```{r}
+# Taxonomic OTU table
+otu_tax = read_excel(filepath, sheet = "metaphlan_counts") 
+View(otu_tax)
+otu_tax = otu_tax %>% 
+  # Use [ ] to read | as a regular character instead of a special character
+  mutate(level = str_count(clade_name,'[|]')) %>% # Count | in each clade_name value
+  # Higher resolution means more | symbols. Extract highest resolution (species).
+  filter(level == max(.$level)) %>% # . refers to 'the data up until this code line'
+  select(-level)
+
+# Separate out the taxonomy data from the OTU table and format it
+tax_table = otu_tax %>% 
+  select(clade_name) %>% 
+  # Note that [ ] aren't needed here for |
+  separate_wider_delim(clade_name,'|', cols_remove = F,
+                       names=c('Kingdom','Phylum','Class','Order',
+                               'Family','Genus','Species')) %>%   
+  column_to_rownames('clade_name') %>% 
+  as.matrix() %>% 
+  tax_table() # Phyloseq-compatible format
+
+# Finish turning otu_tax into a phyloseq-compatible format
+# (Can't do this before extracting tax_table info in previous step)
+otu_tax = otu_tax %>% 
+  column_to_rownames('clade_name') %>% 
+  as.matrix() %>% otu_table(taxa_are_rows = T) # Phyloseq-compatible format
+```
+
+```{r}
+ps = phyloseq(meta,tax_table,otu_tax)
+View(ps)
+
+# .rds files save any R object, where it can be reloaded in its exact format.
+saveRDS(ps,'path/to/save/location/taxonomy_phyloseq.rds')
+```
+
+## 2c: Function
+
+This will use MetaCyc pathway data.
+
+```{r}
+# MetaCyc (pseudo) count data
+otu_pwy = read_excel(filepath, sheet = "humann_pathway_counts")
+
+# Make a dummy taxonomy table
+# Tax tables are necessary components for many analyses, but they're redundant for MetaCyc pathways since they don't have the same hierarchial structure.
+# We'll make one that only has one column, called 'Species' so that it's compatible with other taxonomy tools (which sometimes require some sort of taxonomic column name), and then use the same column to add row names.
+pwy_table = otu_pwy %>% 
+  select(Pathway) %>% rename(Species=Pathway) %>%
+  # Some microbiome tools will automatically change non-alphanumeric characters to 
+  # dots, so we might as well do it now so that all analyses remain consistent.
+  `row.names<-`(str_replace_all(.$Species, "[^[:alnum:]]", ".")) %>% 
+  as.matrix %>% 
+  tax_table()
+
+# Format otu_pwy data
+otu_pwy = otu_pwy %>%
+  # Need same row names as in pwy_table
+  mutate(Pathway=str_replace_all(Pathway, "[^[:alnum:]]", ".")) %>% 
+  column_to_rownames('Pathway') %>% 
+  as.matrix() %>% 
+  otu_table(taxa_are_rows = T)
+```
+
+```{r}
+# Combine everything
+ps.function = phyloseq(meta,pwy_table,otu_pwy)
+View(ps.function)
+
+saveRDS(ps.function,'path/to/save/location/pathway_phyloseq.rds')
+```

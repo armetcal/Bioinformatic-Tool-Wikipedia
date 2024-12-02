@@ -1,0 +1,134 @@
+---
+title: "Differential Abundance Tutorial"
+author: "Avril Metcalfe-Roach"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Background
+
+Differential abundance tests whether differences in the abundances of individual taxa (or pathways/functions) between groups are significant.
+
+Most tools use raw count (or pseudocount) data as input, then apply their own normalization techniques, and then calculate the statistics using some unique statistical approach.
+
+While many tools exist, this tutorial will use ANCOM-BC. Of the high-performing tools, it has middle-of-the-road sensitivity and specificity. it is often recommended to combine the results of multiple tools in order to reduce artefactual bias.
+
+Other recommended tools are MaAsLin2, ALDEx2, and LinDA.
+
+# Part 1: Load libraries and data
+
+```{r}
+library(tidyverse)
+library(phyloseq)
+library(ANCOMBC)
+library(microbiome)
+
+ps = readRDS("path/to/save/location/taxonomy_phyloseq.rds")
+```
+
+# Part 2: Run tool
+
+ANCOM-BC, like many differential abundance tools, is designed to perform its entire workflow within a single command.
+
+```{r Run_tool}
+ancom = ancombc2(ps,
+                 tax_level = 'Family',
+                 # Fixed-effect (normal) variables. a+b format.
+                 fix_formula = 'Case_status',
+                 # Benjamini-Hochberg adjustments are by far the most common
+                 p_adj_method = 'BH',
+                 # Present in at least 30% of samples
+                 # Note: no native abundance filter in ANCOM-BC, filter manually if desired
+                 prv_cut = 0.3,
+                 # FYI: min sampling depth required (default=0)
+                 lib_cut = 0,
+                 # If your variable of interest is categorical with 3+ groups,
+                 # you can set group='variable' and struc_zero=T.
+                 # Essentially, this will automatically mark a taxon as significant
+                 # if there is zero abundance in at least one (but not all) of the groups.
+                 group = NULL,
+                 struc_zero = F)
+```
+
+ANCOM-BC outputs many statistics and summaries in addition to the significance tests. This section will extract the relevant statistics and form a nicely formatted table.
+
+For this example, it would be easy enough to extract the P adjusted column and save it; however, this wouldn't be very efficient with multivariable results due to the default formatting of ancombc. Instead, the below will work for any number of variables.
+
+Significance is automatically set at Padj<0.05. This is marked by diff=T. Furthermore, if it passes sensitivity analysis (still significant after adding a small pseudocount to zeros, good for reducing artefactually significant rare taxa), this will be marked by passed=T. 
+
+```{r Curate_stats}
+# Inspect raw output
+View(ancom$res)
+
+# Format into table
+stats = ancom$res %>% 
+  # Take all columns except taxon and turn into long form data
+  pivot_longer(cols = -taxon, 
+               names_to = 'stat',
+               values_to = 'value') %>% 
+  # The stat value denotes the type of statistic and the variable that value is referring to.
+  # Therefore, separate stat into two columns.
+  separate(col=stat, into = c('stat','variable'),sep='_',remove=T,extra = 'merge') %>% 
+  # the statistic passed_ss is the only statistic with a '_'. This was used to separate the
+  # names above, and so 'ss_' must be removed from the variable column where stat=='passed'.
+  mutate(variable = ifelse(stat=='passed',str_sub(variable,start=4),variable)) %>% 
+  # Remove intercept values, not typically useful
+  filter(variable != '(Intercept)') %>% 
+  # Finally, pivot wider so that each stat value has its own column.
+  pivot_wider(names_from = 'stat', values_from = 'value') %>% 
+  # Sort by adjusted p values (smallest first)
+  arrange(q)
+
+# Inspect the output:
+View(stats)
+
+# There are 4 significant family-level microbes. All are higher in PD (lfc>0).
+```
+
+# Part 3: Plot results
+
+We will extract the significant families and plot them using both relative abundance and CLR transformations. Both are commonly used.
+
+```{r}
+# Extract significant families
+sig = stats %>% filter(diff==T, passed==T)
+
+# Generate dataset for plotting
+relab = ps %>% 
+  tax_glom('Family') %>% 
+  # Perform rel ab transformation BEFORE subsetting taxa
+  microbiome::transform('compositional') %>% 
+  # Subset to only include significant taxa
+  subset_taxa(Family %in% sig$taxon) %>% 
+  # 'Melt' to transform into data table
+  psmelt()
+
+# Plot taxa
+relab %>% 
+  ggplot(aes(Case_status,Abundance,fill=Case_status)) +
+  geom_boxplot(outlier.shape=NA) +
+  geom_jitter(height=0, width=0.2) +
+  theme_classic(base_size=18) +
+  facet_wrap('Family', scales = 'free')
+
+# Let's try it again with CLR transformation
+
+# Generate dataset for plotting
+clr = ps %>% 
+  tax_glom('Family') %>% 
+  # Perform clr transformation BEFORE subsetting taxa
+  microbiome::transform('clr') %>% 
+  # Subset to only include significant taxa
+  subset_taxa(Family %in% sig$taxon) %>% 
+  # 'Melt' to transform into data table
+  psmelt()
+
+# Plot taxa - better resolution
+clr %>% 
+  ggplot(aes(Case_status,Abundance,fill=Case_status)) +
+  geom_boxplot(outlier.shape=NA) +
+  geom_jitter(height=0, width=0.2) +
+  theme_classic(base_size=18) +
+  facet_wrap('Family', scales = 'free')
+```
+

@@ -1,0 +1,120 @@
+---
+title: "Beta Diversity Tutorial"
+author: "Avril Metcalfe-Roach"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Background
+
+Beta diversity uses a PCoA approach to compare all your samples to each other to
+see which ones are the most similar or different. It represents this as
+'distances'. Importantly, the PCoA technique is very similar to PCA and
+therefore it is: a) blind to your outcome (it will separate your samples in
+order to maximize variance, and does not care about your variables) and b)
+dependent on the input samples (if you change the input samples, the relative
+positions of the samples will change to some degree).
+
+Keep the above in mind, as you may want to calculate beta diversity in multiple
+batches in some situations if there is a variable that strongly impacts beta
+diversity (it may mask the effect of other variables). For example, the effect
+of breastfeeding on the infant microbiome at 3 months and 2 years should be
+assessed for each timepoint individually as the infant microbiome changes
+drastically during the first years of life. Otherwise it is typical to run all
+samples together.
+
+There are several ways to calculate beta diversity. Every method will calculate
+a large number of orthogonal PCoA axes, and we typically plot only the first
+two. The most common metrics are Bray-Curtis, Jaccard, Unweighted Unifrac, and
+Weighted Unifrac. Weighted Unifrac requires that a taxonomic tree be generated.
+
+# Part A: Load libraries and data
+
+```{r}
+library(tidyverse)
+library(phyloseq)
+library(vegan)
+library(broom)
+
+ps = readRDS("path/to/save/location/taxonomy_phyloseq.rds")
+```
+
+# Part 2: Rarefaction
+
+Rarefaction: randomly remove read counts from each sample until all samples have
+the same number of reads. Samples with higher depth (more reads) are
+artefactually more likely to detect rare species.
+
+**Most people simply rarefy to the smallest depth in the dataset**, as long as
+all of the samples were successfully sequenced. However, it's best practice to
+run a **'rarefaction curve'** which allows you to see what sequencing depth is
+necessary to fully capture the true alpha diversity of a sample (and thus be
+less susceptible to artefactual variance). In some cases, it may be worth
+**excluding some low-depth reads** in favour of a more accurate rarefaction
+depth.
+
+```{r}
+# Alpha rarefaction curve (takes a VERY long time to run):
+# Ideally you want to choose the smallest value that is after the curve has plateaued.
+# rarecurve(ps@otu_table)
+
+# Once you've decided on a depth, you can then rarefy the data.
+# Rarefies to smallest depth by default; set to 10k here to speed up the tutorial.
+set.seed(421) # Ensure reproducibility
+psrare = ps %>% rarefy_even_depth(sample.size = 10000)
+```
+
+# Part 3: Calculate beta diversity
+
+We will use Bray-Curtis for this tutorial. First we start by calculating the
+distance between each pair of samples, where larger distances indicates
+increasingly different microbiomes:
+
+```{r Calculation}
+# Calculate the distance between each sample pair
+ps_bray <- phyloseq::distance(psrare, method = "bray")
+```
+
+We then transform the distance matrix into a plottable form and/or calculate
+statistics. Both of the below methods produce the same statistical values.
+
+```{r Stats_Only}
+# Calculate significance using PERMANOVA tests. You can add covariables, just like linear regression.
+# This doesn't give x/y coordinates, so you can't easily plot it.
+
+stats = adonis2(ps_bray ~ sample_data(psrare)$Case_status)
+stats = stats[1,] %>% remove_rownames() # Only the first line contains relevant stats
+```
+
+```{r Plot_and_Stats}
+# "Scaling results" with NMDS - this gives x and y coords for plotting, doesn't affect anything else
+# Great for plots, slightly annoying for stats since it takes longer.
+
+mds <- metaMDS(ps_bray)$points %>% as.data.frame %>%
+  merge(sample_data(psrare), by='row.names', sort=F) %>% 
+  column_to_rownames('Row.names')
+
+stats2 = adonis2(ps_bray ~ Case_status, data = mds) %>%
+  .[1,] %>% remove_rownames()
+
+# Both methods give the same results
+stats == stats2
+```
+
+# Part 4: Plot results
+
+Results are usually plotted as a 2D scatterplot with ellipses.
+
+\*\*Note: if calculating statistics on a subsection of the points in a given
+plot, don't rerun `distance()` on the subsetted dataset as the removal of the
+remaining points will result in different distance values than originally
+calculated (i.e. the statistics won't perfectly match the plot since the input
+has changed). It's best to subset `mds` and `ps_bray`, then run `adonis2`.
+
+```{r}
+mds %>%  
+  ggplot(aes(MDS1,MDS2,color = Case_status)) +
+  geom_point() +
+  stat_ellipse() +
+  theme_classic(base_size=20)
+```

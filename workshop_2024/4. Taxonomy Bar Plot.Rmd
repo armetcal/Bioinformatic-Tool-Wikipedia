@@ -1,0 +1,85 @@
+---
+title: "Taxonomy Bar Plot Tutorial"
+author: "Avril Metcalfe-Roach"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Background
+
+Taxonomic bar plots show the relative abundances of the most abundant taxa. Taxa
+under 1% abundance are often grouped as otherwise they are not visible/there are
+too many taxa to reasonably plot.
+
+These bar plots are NOT statistical and should be used only as a visual
+description of the data (no conclusions should be drawn on specific taxa).
+However, it is one of the most common results included in any microbiome paper.
+
+# Part 1: Load packages and data
+
+```{r}
+library(tidyverse)
+library(phyloseq)
+library(microbiome)
+
+ps = readRDS("path/to/save/location/taxonomy_phyloseq.rds")
+```
+
+# Part 2: Group taxa and transform counts
+
+We will create a family-level bar plot, where any species that are from the same
+family will be grouped.
+
+We will then convert counts to relative abundance.
+
+```{r}
+# Group to family level
+family = ps %>% tax_glom('Family') %>% 
+  # Compositional = relative abundance
+  microbiome::transform('compositional')
+
+# All sample counts now sum to 1 (100%).
+table(sample_sums(family))
+```
+
+# Part 3: Group means and combine low abundances
+
+Next we will calculate the mean abundance of each taxon for each group of
+interest (PD and Control). It is ideal to plot one bar per sample, but this is
+not feasible for large cohorts.
+
+We will then combine the means for any taxa where mean \< 1%.
+
+```{r}
+# 'Melt' the family phyloseq object (create one big data table)
+familymelt = family %>% psmelt()
+
+# Mean abundances
+familymeans = familymelt %>% 
+  group_by(Case_status,Family) %>% # Perform following on every Case_status & Family combo in parallel
+  summarize(Abundance = mean(Abundance)) %>% 
+  ungroup() # Stop performing in parallel
+
+# Combine <1% (<0.01)
+familymeans = familymeans %>% 
+  mutate(Family = ifelse(Abundance < 0.01, 'Other (<1%)', Family)) %>% 
+  group_by(Case_status,Family) %>% 
+  # Combine abundances from all the rare taxa
+  summarize(Abundance = sum(Abundance)) %>% 
+  ungroup()
+
+# Check that the total for each group still adds up to 1 (100%)
+sum(familymeans$Abundance[familymeans$Case_status=='PD'])
+sum(familymeans$Abundance[familymeans$Case_status=='Control'])
+```
+
+# Part 4: Plot
+
+Results are plotted as a stacked bar plot.
+
+```{r}
+familymeans %>% 
+  ggplot(aes(Case_status,Abundance,fill=Family)) +
+  geom_col(position='stack') +
+  theme_classic(base_size=18)
+```

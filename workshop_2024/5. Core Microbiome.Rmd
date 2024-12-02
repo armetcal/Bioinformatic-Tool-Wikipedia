@@ -1,0 +1,63 @@
+---
+title: "Core Microbiome Tutorial"
+author: "Avril Metcalfe-Roach"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Background
+
+The core microbiome analysis produces a Venn diagram of the most abundant/prevalent taxa or functions present across sample groups. This helps determine a) the number of taxa (related to richness) and b) how much overlap there is between groups (related to beta diversity).
+
+# Part 1: Load packages and data
+
+```{r}
+library(tidyverse)
+library(phyloseq)
+library(microbiome)
+library(ggVennDiagram)
+
+ps = readRDS("path/to/save/location/taxonomy_phyloseq.rds")
+```
+
+# Part 2: Rarefaction
+
+Similar to alpha and beta diversity, samples are rarefied prior to analysis to ensure that differences in the number of features is not due to sampling depth.
+
+```{r}
+# Alpha rarefaction curve (takes a VERY long time to run):
+# Ideally you want to choose the smallest value that is after the curve has plateaued.
+# rarecurve(ps@otu_table)
+
+# Once you've decided on a depth, you can then rarefy the data.
+# Rarefies to smallest depth by default; set to 10k here to speed up the tutorial.
+set.seed(421) # Ensure reproducibility
+psrare = ps %>% rarefy_even_depth(sample.size = 10000)
+```
+
+# Part 3: Plot
+
+```{r}
+# Divide phyloseq object into groups of interest
+rel1 <- subset_samples(psrare, Case_status=="PD")
+rel2 <- subset_samples(psrare, Case_status=="Control")
+
+# Calculate core members (>0.1% abundance, >30% prevalence)
+# Try changing the cutoffs to see what happens!
+group1_core <- core_members(rel1, detection=1e-3, prevalence=0.3)
+group2_core <- core_members(rel2, detection=1e-3, prevalence=0.3)
+
+# Plot results
+p = ggVennDiagram(x=list(group1_core, group2_core),
+                    set_size = 6,
+                    category.names = c('PD','Control')) +
+    guides(fill=guide_legend(title='')) +
+    scale_x_continuous(expand = expansion(mult = .1))
+p
+
+# Record the taxa present in each part of the Venn diagram
+core_members = tibble(taxon = unique(c(group1_core,group2_core))) %>% 
+  mutate(PD = taxon %in% group1_core,
+         Control = taxon %in% group2_core)
+```
+

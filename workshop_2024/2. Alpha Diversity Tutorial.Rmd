@@ -1,0 +1,133 @@
+---
+title: "Alpha Diversity Tutorial"
+author: "Avril Metcalfe-Roach"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Background
+
+Alpha diversity gives you an idea of the richness (\# of species) and/or
+evenness of a microbial population. The Shannon alpha diversity is the most
+common metric, as it incorporates both elements; however, there are many
+variations.
+
+# Part 1: Load packages and data
+
+```{r}
+library(tidyverse)
+library(phyloseq)
+library(vegan)
+library(broom)
+
+ps = readRDS("path/to/save/location/taxonomy_phyloseq.rds")
+```
+
+# Part 2: Rarefaction
+
+Rarefaction: randomly remove read counts from each sample until all samples have
+the same number of reads. Samples with higher depth (more reads) are
+artefactually more likely to detect rare species.
+
+**Most people simply rarefy to the smallest depth in the dataset**, as long as
+all of the samples were successfully sequenced. However, it's best practice to
+run a **'rarefaction curve'** which allows you to see what sequencing depth is
+necessary to fully capture the true alpha diversity of a sample (and thus be
+less susceptible to artefactual variance). In some cases, it may be worth
+**excluding some low-depth reads** in favour of a more accurate rarefaction
+depth.
+
+```{r}
+# Alpha rarefaction curve (takes a VERY long time to run):
+# Ideally you want to choose the smallest value that is after the curve has plateaued.
+# rarecurve(ps@otu_table)
+
+# Once you've decided on a depth, you can then rarefy the data.
+# Rarefies to smallest depth by default; set to 10k here to speed up the tutorial.
+set.seed(421) # Ensure reproducibility
+psrare = ps %>% rarefy_even_depth(sample.size = 10000)
+```
+
+# Part 3: Calculate and plot alpha diversity
+
+There are a few ways to calculate alpha diversity in R.
+
+```{r Method_1}
+# This method outputs a vector of values and must be run separately for each type of alpha diversity desired.
+psrare@sam_data$Shannon = diversity(psrare@otu_table, index='shannon', MARGIN = 2)
+
+# Extract the sample data from the phyloseq object and plot it.
+# If you extract the metadata directly (ps@sam_data %>% as.matrix %>% as.data.frame),
+# all of the columns will default to character format (even numbers).
+# The below method conserves column structures.
+psmelt = prune_taxa(
+  # Filter to include only a single taxon
+  row.names(psrare@tax_table)[1], psrare) %>% 
+  # Then use psmelt (output will only contain 1 row per sample because of prune_taxa)
+  psmelt()
+
+plot_m1 = psmelt %>% ggplot(aes(Case_status,Shannon,col=Case_status)) +
+  geom_boxplot(outlier.shape=NA) +
+  geom_jitter(height=0,width=0.2) +
+  theme_classic(base_size=18) +
+  xlab('Case Status') + ylab('Shannon Diversity') +
+  theme(legend.position = 'none')
+plot_m1
+```
+
+```{r Method_2}
+# This way automatically calculates and plots multiple common alpha diversity metrics.
+# The plot is compatible with ggplot, but the plot formatting is usually unusable.
+plot_m2 = plot_richness(psrare, x = 'Case_status', 
+                  measures = c('Observed','Shannon','Chao1','Simpson'),
+                  color = 'Case_status') +
+  geom_boxplot(outlier.shape = NA) +
+  theme_classic(base_size=20)
+plot_m2
+
+# Workaround: use this method to quickly calculate multiple metrics, and then simply extract the data from the plot and replot it.
+pdata = plot_m2$data
+replotted = pdata %>% ggplot(aes(Case_status,value,col=Case_status)) +
+  geom_boxplot(outlier.shape=NA) +
+  geom_jitter(height=0,width=0.2) +
+  theme_classic(base_size=18) +
+  facet_wrap('variable', nrow=1,scales = 'free') +
+  xlab('Case Status') + ylab('Alpha Diversity Measure') +
+  theme(legend.position = 'none')
+replotted
+```
+
+# Part 4: Calculate Statistics
+
+Alpha diversity can be treated as a normal continuous variable, so we can use
+any regular test (wilcoxon tests, linear models, etc).
+
+```{r}
+# Using Method 2 data
+
+# Just shannon:
+wilcox.test(value~Case_status, data = pdata %>% filter(variable=='Shannon'))
+
+# All 4 of the metrics we calculated:
+pdata %>%
+  group_by(variable) %>% # For every metric, we will do the following in parallel
+  group_modify(~wilcox.test(value~Case_status, data = .) %>% broom::tidy()) %>% 
+  ungroup() %>% 
+  # Let's add corrected p values, since we're doing multiple comparisons
+  mutate(Padj = p.adjust(p.value, method='BH'))
+
+# Looks like richness, but not evenness, is different between groups.
+```
+
+We can also easily add Wilcoxon tests to our plots without having to manually
+calculate it. However, these values cannot be easily extracted from the plot
+using code, so manual calculation is often still necessary for publishing.
+
+```{r}
+replotted +
+  ggpubr::stat_compare_means(method='wilcox.test', 
+                             comparisons = list(c('Control','PD')),
+                             size=5) +
+  # Give the y axis a bit more space for the stats
+  scale_y_continuous(expand = expansion(mult = 0.1))
+```
