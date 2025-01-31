@@ -54,9 +54,12 @@ less susceptible to artefactual variance). In some cases, it may be worth
 depth.
 
 ```{r}
-# Alpha rarefaction curve (takes a VERY long time to run):
+# Alpha rarefaction curve (takes a long time to run):
 # Ideally you want to choose the smallest value that is after the curve has plateaued.
-# rarecurve(ps@otu_table)
+# Ensure that your samples are in rows, not columns.
+# step: only recalculates every N depths (ex. 1, 1001, 2001, etc). WAY FASTER
+# If it plateaus early on and is hard to see on the plot, try the tidy option (see ?rarecurve).
+rarecurve(as(otu_table(ps), "matrix"),step=1000)
 
 # Once you've decided on a depth, you can then rarefy the data.
 # Rarefies to smallest depth by default; set to 10k here to speed up the tutorial.
