@@ -97,6 +97,7 @@ body {
   background: #2d3e50; /* Darker blue-grey background */
   color: #ececec;  /* Softer off-white text */
   height: 100%;
+  font-size: 18px;
 }
 
 div {
