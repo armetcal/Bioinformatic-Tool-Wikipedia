@@ -4,6 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Metagenomic Tutorials</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -12,48 +13,101 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 
-<body>
+<body class="home-page">
+
     <header>
         <a class="logo" href="index.html">Metagenomic Tutorials</a>
         <nav class="nav__links">
             <ul>
-                <li><a href="https://github.com/armetcal/BIOINFORMATIC-TOOL-WIKIPEDIA">GitHub</a></li>
+                <li><a href="https://github.com/armetcal/BIOINFORMATIC-TOOL-WIKIPEDIA">
+                    <i class="fa fa-github" aria-hidden="true"></i> GitHub
+                </a></li>
             </ul>
         </nav>
     </header>
-    <h3 class="logo" style='padding: 0.5% 5%;color:#aedcfc;'>Metagenomics Workshop (Dec. 2024)</h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'>This webpage contains a series of R scripts that run a suite of the most common gut microbiome analyses using a publicly available dataset. Most tools can be run on both taxonomy and functions, but only taxonomy is used in these tutorials.</h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'>The dataset used was published by Wallen et. al (2022) and the annotated data are available for download at <a href="https://zenodo.org/records/7246185">https://zenodo.org/records/7246185</a>.</h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'>Download the following scripts. 0 and 1 must be run first, and the others can be run in any order.</h3>
+
+    <main class="home-main">
+
+        <section class="home-cards">
+            <!-- About -->
+            <section class="home-about">
+                <h2 class="home-about-title">Metagenomics Analysis Workshop (Dec. 2024)</h2>
+                <p class="home-about-text">This webpage contains a series of R scripts that run a suite of the most common 
+                    gut microbiome analyses using a publicly available dataset. Most tools can be run on both taxonomy and 
+                    functions, but only taxonomy is used in these tutorials.</p>
+                <p class="home-about-text">The dataset used was published by Wallen et. al (2022) and the annotated data 
+                    are available for download at <a href="https://zenodo.org/records/7246185">https://zenodo.org/records/7246185</a>.</p>
+                <p class="home-about-text">Download the following scripts. 0 and 1 must be run first, and the others can 
+                    be run in any order.</p>
+            </section>
+        </section>
     
-    <h3 class="logo2" style='padding: 0.5% 5%;color:#aedcfc;'><a href="0. Install necessary packages.R" download>0. Install necessary packages.R</a></h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:#aedcfc;'><a href="1. Create phyloseq object.Rmd" download>1. Create phyloseq object.Rmd</a></h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:#aedcfc;'><a href="2. Alpha Diversity Tutorial.Rmd" download>2. Alpha Diversity Tutorial.Rmd</a></h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:#aedcfc;'><a href="3. Beta Diversity Tutorial.Rmd" download>3. Beta Diversity Tutorial.Rmd</a></h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:#aedcfc;'><a href="4. Taxonomy Bar Plot.Rmd" download>4. Taxonomy Bar Plot.Rmd</a></h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:#aedcfc;'><a href="5. Core Microbiome.Rmd" download>5. Core Microbiome.Rmd</a></h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:#aedcfc;'><a href="6. Differential Abundance with ANCOM-BC Tutorial.Rmd" download>6. Differential Abundance with ANCOM-BC Tutorial.Rmd</a></h3>
-    
-    <br />
+        <section class="home-cards">
+            <!-- Individual Tutorials -->
+            <article class="home-card">
+                <h2 class="home-card-title">
+                    <i class="fa fa-book home-card-icon"></i> Download R Scripts
+                </h2>
+
+                <h3 class="home-subsection-title">Initialize Datasets</h3>
+                <ul class="home-link-list">
+                    <li>
+                        <a href="0. Install necessary packages.R" download>
+                            <span class="home-step-badge">0</span>
+                            Install necessary packages.R
+                        </a>
+                    </li>
+                    <li>
+                        <a href="1. Create phyloseq object.Rmd" download>
+                            <span class="home-step-badge">1</span>
+                            Create phyloseq object.Rmd
+                        </a>
+                    </li>
+                </ul>
+
+                <h3 class="home-subsection-title">Analyses</h3>
+                <ul class="home-link-list">
+                    <li>
+                        <a href="2. Alpha Diversity Tutorial.Rmd" download>
+                            <span class="fa fa-chevron-right home-link-arrow"></span>
+                            Alpha Diversity Tutorial.Rmd
+                        </a>
+                    </li>
+                    <li>
+                        <a href="3. Beta Diversity Tutorial.Rmd" download>
+                            <span class="fa fa-chevron-right home-link-arrow"></span>
+                            Beta Diversity Tutorial.Rmd
+                        </a>
+                    </li>
+                    <li>
+                        <a href="4. Taxonomy Bar Plot.Rmd" download>
+                            <span class="fa fa-chevron-right home-link-arrow"></span>
+                            Taxonomy Bar Plot.Rmd
+                        </a>
+                    </li>
+                    <li>
+                        <a href="5. Core Microbiome.Rmd" download>
+                            <span class="fa fa-chevron-right home-link-arrow"></span>
+                            Core Microbiome.Rmd
+                        </a>
+                    </li>
+                    <li>
+                        <a href="6. Differential Abundance with ANCOM-BC Tutorial.Rmd" download>
+                            <span class="fa fa-chevron-right home-link-arrow"></span>
+                            Differential Abundance with ANCOM-BC Tutorial.Rmd
+                        </a>
+                    </li>
+                </ul>
+            </article>
+        </section>
+
+    <footer class="home-footer site-footer">
+        <div class="home-footer-inner">
+            <hr class="home-footer-hr" />
+            <p>Developed by Avril Metcalfe-Roach</p>
+            <p>Contact: <a href="mailto:avril.metcalfe-roach@ubc.ca">avril.metcalfe-roach@ubc.ca</a></p>
+            <p>Updated: 20 May 2026</p>
+        </div>
+    </footer>
 </body>
-<footer class="site-footer">
-    <div style='clear: both; max-width: 10000px;'>
-        <hr>
-        <p>
-            <center>
-                Developed by Avril Metcalfe-Roach.
-            </center>
-        </p>
-        <p>
-            <center>
-                Contact email: avril.metcalfe-roach@ubc.ca
-            </center>
-        </p>
-        <p>
-            <center>
-                Updated: 1 December 2024
-            </center>
-        </p>
-    </div>
-</footer>
 </html>
