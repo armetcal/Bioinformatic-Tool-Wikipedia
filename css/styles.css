@@ -98,6 +98,357 @@ body {
   background: #2d3e50;
   color: #ececec;
   height: 100%;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+div {
+  word-wrap: normal;
+  max-width: 630px;
+}
+
+b {
+  color: #4fc3f7;
+}
+
+mark {
+  background-color: #81d4fa;
+  font-weight: bold;
+  padding: 0px;
+}
+
+.btn {
+  padding: 1rem !important;
+  border-radius: 20px;
+}
+
+.btn-refresh {
+  background-color: #1e90ff !important;
+  font-size: 1.05rem;
+}
+
+button.btn.def {
+  background-color: #1e3a5f;
+  border-color: #1e3a5f;
+  box-shadow: 2px 2px #000000;
+  font-size: 1rem;
+  color: #ececec;
+  padding-left: 3px;
+  padding-right: 3px;
+  margin-left: 3px;
+  margin-right: 3px;
+  text-align: center;
+  transition: all ease-in-out 0.5s;
+  cursor: pointer;
+  display: inline-block;
+}
+
+button.btn.def:hover {
+  border-color: #12253b;
+  background-color: #1e3a5f;
+  transition: all ease-in-out 0s;
+  color: #ececec;
+}
+
+.ans {
+  margin-left: 65px !important;
+  font-size: 1.2rem;
+  color: #81d4fa;
+}
+
+.ans2 {
+  margin-left: 130px !important;
+  font-size: 1.2rem;
+  color: #81d4fa;
+}
+
+img {
+  padding-top: 10px;
+  padding: 10px;
+  max-width: 700px;
+  max-height: 700px;
+  width: 100%;
+  height: auto;
+}
+
+@media only screen and (max-width: 1350px) {
+  #gen_codons {
+      display: none;
+  }
+}
+
+.homepage_link {
+  color: #81d4fa;
+  font-size: 1.1rem;
+}
+
+.sub_question {
+  margin-left: 1%;
+  display: inline;
+  font-size: 1rem;
+}
+
+/* ============================================================
+   Home page layout  (scoped to body.home-page)
+   ============================================================ */
+
+body.home-page {
+  background: linear-gradient(160deg, #0d1b2a 0%, #1a2f45 100%);
+  min-height: 100vh;
+  color: #d8eaf8;
+}
+
+/* ---------- hero / about ---------- */
+.home-about {
+  background: transparent;
+  border-bottom: none;
+  padding: 2rem 6% 0.5rem;
+  max-width: 900px;
+}
+
+.home-about-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #9ad5ff;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.home-about-text {
+  font-size: 1.5rem;
+  color: #cce6f8;
+  line-height: 1.8;
+  max-width: 900px;
+  margin-bottom: 0.9rem;
+}
+
+/* ---------- card grid ---------- */
+.home-main {
+  display: block;
+}
+
+.home-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  padding: 1.75rem 6% 2.5rem;
+  max-width: 1200px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* ---------- individual cards ---------- */
+.home-card {
+  background: #16304a;
+  border: 1px solid #2a4d6e;
+  border-left: 4px solid #4fc3f7;
+  border-radius: 6px;
+  padding: 1.35rem 1.5rem;
+  flex: 0 1 320px;
+  max-width: 360px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.home-card:hover {
+  box-shadow: 0 6px 26px rgba(79, 195, 247, 0.18);
+  transform: translateY(-2px);
+}
+
+.home-card--featured {
+  border-left-color: #f0c040;
+  background: #1a2f45;
+}
+
+.home-card--featured .home-card-title {
+  color: #f0d080;
+}
+
+.home-card--featured .home-card-icon {
+  color: #f0c040;
+}
+
+.home-card-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #9ad5ff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #2a4d6e;
+}
+
+.home-card-icon {
+  color: #4fc3f7;
+  margin-right: 0.4rem;
+}
+
+/* ---------- subsection headings inside cards ---------- */
+.home-subsection-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #7ec8e3;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin: 1.2rem 0 0.5rem;
+}
+
+/* ---------- link lists ---------- */
+.home-link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.home-link-list li {
+  float: none;
+  border-bottom: 1px solid #1e3a5f;
+}
+
+.home-link-list li:last-child {
+  border-bottom: none;
+}
+
+.home-link-list li a {
+  display: block;
+  padding: 0.55rem 0.25rem;
+  color: #b8ddf5;
+  text-decoration: none;
+  font-size: 1.2rem;
+  transition: color 0.15s ease, padding-left 0.15s ease;
+}
+
+.home-link-list li a:hover {
+  color: #ffffff;
+  padding-left: 0.5rem;
+  text-decoration: none;
+}
+
+.home-link-arrow {
+  color: #4fc3f7;
+  margin-right: 0.4rem;
+  font-size: 1rem;
+}
+
+/* ---------- numbered step badges ---------- */
+.home-step-badge {
+  display: inline-block;
+  background: #1e3a5f;
+  border: 1px solid #4fc3f7;
+  color: #9ad5ff;
+  font-size: 1rem;
+  font-weight: 700;
+  width: 1.7rem;
+  height: 1.7rem;
+  line-height: 1.7rem;
+  text-align: center;
+  border-radius: 50%;
+  margin-right: 0.45rem;
+  vertical-align: middle;
+}
+
+/* ---------- footer ---------- */
+.home-footer-inner {
+  max-width: none;
+  text-align: center;
+  padding: 0.5rem 5%;
+  color: #7ca8c8;
+}
+
+.home-footer-inner a {
+  color: #7ec8e3;
+}
+
+.home-footer-inner a:hover {
+  color: #ffffff;
+}
+
+.home-footer-hr {
+  border-color: #2a4d6e;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 640px) {
+  .home-cards {
+    padding: 1.5rem 4%;
+    gap: 1rem;
+  }
+
+  .home-about {
+    padding: 1.5rem 4% 0.5rem;
+  }
+
+  .home-card {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
+li aindent {
+  display: block;
+  padding-left: 30px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5% 5%;
+    background-color: #1e3a5f;
+    border-radius: 0px;
+    box-shadow: 2px 2px #000000;
+}
+
+.hide {
+  display: none !important;
+}
+
+.show {
+  display: inline !important;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 15pt;
+  color: #f1f1f1;
+}
+
+.logo2 {
+  font-size: 14pt;
+}
+
+header a {
+  text-decoration: none !important;
+  color: #ffffff;
+  font-size: 17px;
+}
+
+header aindent {
+  text-decoration: none !important;
+  color: #ffffff;
+  font-size: 17px;
+}
+
+header a:hover {
+  color: #1e90ff;
+  text-decoration: none !important;
+}
+
+header aindent:hover {
+  color: #1e90ff;
+  text-decoration: none !important;
+}
+
+.content {
+  padding: 2% 2% 2% 5%;
+}
+
+body {
+  background: #2d3e50;
+  color: #ececec;
+  height: 100%;
   font-size: 18px;
   line-height: 1.6;
 }
