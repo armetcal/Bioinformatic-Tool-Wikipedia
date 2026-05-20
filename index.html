@@ -4,6 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Metagenomic Tutorials</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -12,70 +13,126 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body>
+<body class="home-page">
     <header>
         <a class="logo" href="index.html">Metagenomic Tutorials</a>
         <nav class="nav__links">
             <ul>
-                <li><a href="https://github.com/armetcal/BIOINFORMATIC-TOOL-WIKIPEDIA">GitHub</a></li>
+                <li><a href="https://github.com/armetcal/BIOINFORMATIC-TOOL-WIKIPEDIA">
+                    <i class="fa fa-github" aria-hidden="true"></i> GitHub
+                </a></li>
             </ul>
         </nav>
     </header>
-    <h3 class="logo" style='padding: 0.5% 5%;color:#9ad5ff;'>About</h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'>This repository is designed to act as a reproducible guide for running various
-        bioinformatic tools, particularly those related to DNA/protein/RNA/metabolite
-        quantification and similar comparisons.</h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'>Unless otherwise specified, the following tutorials assume that you are analyzing metagenomic data that are available on the NCBI database.</h3>
-    <h3 class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'>Many tools are available for each step. This pipeline prioritizes up-to-date, high-performing tools that are easy to run on Compute Canada. All tutorials involving unannotated data are adapted for use with Compute Canada resources.</h3>
-    
-    <h2 class="logo" style='padding: 0.5% 5%;color:#9ad5ff;'>COMPLETE PIPELINES</h2>
-    <a class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'
-        href="complete_pipelines/clean_metagenomic_reads.html">Cleaning Raw Metagenomic Reads</a>
-    
-    <h2 class="logo" style='padding: 0.5% 5%;color:#9ad5ff;'>INDIVIDUAL TUTORIALS</h2>
-    <h3 class="logo" style='padding: 0.5% 5%;color:#9ad5ff;'>Cleaning Raw Metagenomic Reads</h3>
-    <a class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'
-        href="download_reads/index.html">1. Downloading Metagenomic Reads</a>
-    <br />
-    <a class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'
-        href="read_filtering/fastqc.html">2. Read QC with FASTQC</a>
-    <br />
-    <a class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'
-        href="read_filtering/bbduk.html">3. Trimming and Filtering Reads with BBDuk</a>
-    <br />
-    <a class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'
-        href="read_filtering/hocort.html">4. Removing Host Reads with HoCoRT</a>
-    <br />
-    
-    <h3 class="logo" style='padding: 0.5% 5%;color:#9ad5ff;'>Read Assembly and Annotation</h3>
-    <a class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'
-        href="Annotation/metaphlan.html">Taxonomic Annotation with MetaPhlAn4</a>
-    <br />
-    <a class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'
-        href="Annotation/humann.html">Functional Annotation with HUMAnN</a>
-    <br />
-    <h2><a class="logo2" style='padding: 0.5% 5%;color:rgb(250, 242, 232);'
-        href="workshop_2024/index.html">METAGENOMICS WORKSHOP 2024</a></h2>
-    <br />
+
+    <main class="home-main">
+
+        <!-- About -->
+        <section class="home-about">
+            <h2 class="home-about-title">About</h2>
+            <p class="home-about-text">This repository is designed to act as a reproducible guide for running various
+                bioinformatic tools, particularly those related to DNA/protein/RNA/metabolite
+                quantification and similar comparisons.</p>
+            <p class="home-about-text">Unless otherwise specified, the following tutorials assume that you are
+                analyzing metagenomic data that are available on the NCBI database.</p>
+            <p class="home-about-text">Many tools are available for each step. This pipeline prioritizes
+                up-to-date, high-performing tools that are easy to run on Compute Canada. All tutorials
+                involving unannotated data are adapted for use with Compute Canada resources.</p>
+        </section>
+
+        <div class="home-cards">
+
+            <!-- Complete Pipelines -->
+            <section class="home-card">
+                <h2 class="home-card-title">
+                    <i class="fa fa-list-alt home-card-icon"></i> Complete Pipelines
+                </h2>
+                <ul class="home-link-list">
+                    <li>
+                        <a href="complete_pipelines/clean_metagenomic_reads.html">
+                            <i class="fa fa-chevron-right home-link-arrow"></i>
+                            Cleaning Raw Metagenomic Reads
+                        </a>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Individual Tutorials -->
+            <section class="home-card">
+                <h2 class="home-card-title">
+                    <i class="fa fa-book home-card-icon"></i> Individual Tutorials
+                </h2>
+
+                <h3 class="home-subsection-title">Cleaning Raw Metagenomic Reads</h3>
+                <ul class="home-link-list">
+                    <li>
+                        <a href="download_reads/index.html">
+                            <span class="home-step-badge">1</span>
+                            Downloading Metagenomic Reads
+                        </a>
+                    </li>
+                    <li>
+                        <a href="read_filtering/fastqc.html">
+                            <span class="home-step-badge">2</span>
+                            Read QC with FASTQC
+                        </a>
+                    </li>
+                    <li>
+                        <a href="read_filtering/bbduk.html">
+                            <span class="home-step-badge">3</span>
+                            Trimming and Filtering Reads with BBDuk
+                        </a>
+                    </li>
+                    <li>
+                        <a href="read_filtering/hocort.html">
+                            <span class="home-step-badge">4</span>
+                            Removing Host Reads with HoCoRT
+                        </a>
+                    </li>
+                </ul>
+
+                <h3 class="home-subsection-title">Read Assembly and Annotation</h3>
+                <ul class="home-link-list">
+                    <li>
+                        <a href="Annotation/metaphlan.html">
+                            <i class="fa fa-chevron-right home-link-arrow"></i>
+                            Taxonomic Annotation with MetaPhlAn4
+                        </a>
+                    </li>
+                    <li>
+                        <a href="Annotation/humann.html">
+                            <i class="fa fa-chevron-right home-link-arrow"></i>
+                            Functional Annotation with HUMAnN
+                        </a>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Workshop -->
+            <section class="home-card home-card--featured">
+                <h2 class="home-card-title">
+                    <i class="fa fa-graduation-cap home-card-icon"></i> Metagenomics Workshop 2024
+                </h2>
+                <ul class="home-link-list">
+                    <li>
+                        <a href="workshop_2024/index.html">
+                            <i class="fa fa-chevron-right home-link-arrow"></i>
+                            View Workshop Materials
+                        </a>
+                    </li>
+                </ul>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="home-footer site-footer">
+        <div class="home-footer-inner">
+            <hr class="home-footer-hr" />
+            <p>Developed by Avril Metcalfe-Roach</p>
+            <p>Contact: <a href="mailto:armetcal@msl.ubc.ca">armetcal@msl.ubc.ca</a></p>
+            <p>Updated: 3 October 2024</p>
+        </div>
+    </footer>
 </body>
-<footer class="site-footer">
-    <div style='clear: both; max-width: 10000px;'>
-        <hr>
-        <p>
-            <center>
-                Developed by Avril Metcalfe-Roach.
-            </center>
-        </p>
-        <p>
-            <center>
-                Contact email: armetcal@msl.ubc.ca
-            </center>
-        </p>
-        <p>
-            <center>
-                Updated: 3 October 2024
-            </center>
-        </p>
-    </div>
-</footer>
 </html>
