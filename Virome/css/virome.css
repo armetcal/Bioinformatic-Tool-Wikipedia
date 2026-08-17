@@ -1,0 +1,33 @@
+/* General */
+
+body{font-family:system-ui,Arial,sans-serif;padding:12px}
+
+.home-about-text { font-size:1.4rem; }
+
+.array-note { color:white; font-size:1.4rem; }
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Tables */
+/* Dynamic table column sizing: allow columns to size to content */
+#cleaning-table { width: 100%; table-layout: auto; font-size:1.4rem; border-collapse: collapse; 
+border: 1px solid #1e3a5f; border-radius: 10px;}
+
+#cleaning-table th, #cleaning-table td { padding: 8px; text-align: left; vertical-align: top; word-break: keep-all; 
+white-space: normal; background-color: #254f85; border: 1px solid #1e3a5f;}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Code blocks */
+/* Left-justify code blocks: remove container padding and any pre indentation */
+.box { width:100%;  max-width: none !important; }
+.box pre { margin:0; padding:0; background:#272727; border-radius:6px; overflow:scroll; white-space:pre; font-family: Menlo, Monaco, "Courier New", monospace; color:#0b0b0b;}
+.box pre code { display:block; white-space:pre; margin:0; padding:0.4rem 0.6rem;}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Mermaid diagrams */
+/* center diagram container and allow horizontal scroll when needed */
+#diagram{width:100%; overflow:auto; display:flex; justify-content:center; text-align:center; max-width: 900px  !important; }
+/* let rendered SVG keep its intrinsic width up to container size, and center it */
+#diagram .mermaid, #diagram svg{display:inline-block; max-width:10%; height:auto; margin:auto; vertical-align:top;}

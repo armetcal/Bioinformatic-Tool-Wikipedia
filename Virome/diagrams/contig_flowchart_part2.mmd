@@ -1,0 +1,38 @@
+flowchart TB
+  subgraph Step3b[" "]
+    C8[AMBIGUOUS 
+        VIRAL CONTIGS]
+    C9[Validation with CAT
+
+      <i>Viral contig fulfils EITHER:
+      a. <40pct of contig classified 
+          as bacterial, archaeal, or 
+          eukaryotic, based on avg 
+          gene size of 1000
+      b. Classified as eukaryotic viral 
+          contig by CAT</i>]
+  end
+
+  subgraph Step4[" "]
+    C7[HIGH-CONFIDENCE
+        VIRAL CONTIGS]
+    C10[Trim and filter with 
+        CheckV end-to-end]
+
+    C11[Final contig filter
+
+      <i>One or more of:
+      a. n_viral_genes > 0
+      b. n_viral_genes == 0 
+          AND n_host_genes == 0
+      c. length >= 1000
+      d. pct_unknown_genes >= 75</i>]
+
+    C12[FILTERED
+        VIRAL CONTIGS]
+
+    C7 --> C10
+    C8 --> C9 --> C10
+    C10 --> C11 --> C12
+
+  end

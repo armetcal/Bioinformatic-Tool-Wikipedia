@@ -1,0 +1,25 @@
+flowchart TB
+    A["READ CLEANING\n(FASTQC, FastP, Hostile)"]
+    B["ASSEMBLY\n(metaSPAdes, QUAST, mummer)"]
+    C["IDENTIFICATION OF VIRAL CONTIGS\n(VirSorter2, DeepVirFinder,\nCAT, CheckV)"]
+    D["CLUSTERING\n(MMseqs2, CheckV)"]
+    E["TAXONOMY & FUNCTION\n(MMSeqs2, Prodigal,\nVContact3, DRAM-v)"]
+    F["CONTIG ABUNDANCE\n(CoverM)"]
+    G["VIRAL DIVERSITY\n(minimap2, samtools,\nProdigal, MetaPop)"]
+    H["HOST PREDICTION\n(iPHoP, MinCED, blastn)"]
+
+    A --> B
+    A --> F
+    A --> G
+
+    B --> C
+    B --> H
+
+    C --> D
+
+    D --> E
+    D --> F
+    D --> G
+    D --> H
+
+  

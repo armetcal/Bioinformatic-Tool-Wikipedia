@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metagenomic Tutorials</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/virome.css">
+    <!-- Load code-rendering script -->
+    <script src="js/load-scripts.js"></script>
+    <!-- Mermaid diagrams -->
+    <script src="js/load-mermaid.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- PrismJS: syntax highlighting -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+</head>
+
+<body class="home-page">
+    <header>
+        <a class="logo" href="index.html" style="font-size:18px">Viromics</a>
+        <a class="logo" href="cleaning.html" style="font-size:36px">Step 3: Identifying Viral Contigs</a>
+        <nav class="nav__links">
+            <ul>
+                <li><a href="https://github.com/armetcal/BIOINFORMATIC-TOOL-WIKIPEDIA">
+                    <i class="fa fa-github" aria-hidden="true" style="font-size:18px"></i> GitHub
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <br>
+
+    <!-- About -->
+    <section class="home-about">
+        <h2 class="home-about-title">Overview</h2>
+        <p class="home-about-text">This identifies viral contigs with DeepVirFinder and VirSorter2, 
+            then filters for quality. Any ambiguous hits are validated with CAT. Finally, viral contigs are trimmed and 
+            filtered with CheckV in order to remove any lingering non-viral elements. (Since bacteriophages insert themselves 
+            into host genomes, it's common to have host DNA flanking the viral DNA)</p>
+    </section>
+
+    <section class="home-about">
+        <p class="home-about-title">Step 1: Generate lists of high-confidence and ambiguous hits.</p> 
+        <div data-mmd="diagrams/contig_flowchart_part1.mmd" id="diagram1" class="mermaid" style="padding: 0rem 0% 0rem; max-width: 600px !important;"> </div>    
+    </section>
+
+    <section class="home-about">
+        <p class="home-about-title">Step 2: Validate ambiguous hits, then apply final trim & filter.</p> 
+        <div data-mmd="diagrams/contig_flowchart_part2.mmd" id="diagram2" class="mermaid" style="padding: 0rem 0% 0rem; max-width: 600px !important;"> </div>
+    </section>
+
+    <section class="home-about">
+        <h2 class="home-about-title">Required Software</h2>
+        <p class="home-about-text">The following software was used to run the original scripts. Please update as desired.</p>
+        <p class="home-about-text">Disclaimer: Please note that all scripts are designed to be run in Compute Canada, 
+            which has some software pre-installed as modules. Compute Canada also uses SLURM to run jobs. 
+            Please adjust the code as needed for your system.</p>
+        <table id="cleaning-table" style="width:100%;">
+            <tr>
+                <th>Software</th>
+                <th>Version</th>
+                <th>Format used</th>
+                <th>Purpose</th>
+            </tr>
+            <tr>
+                <td>VirSorter2</td>
+                <td>(info not on hand)</td>
+                <td>.sif file</td>
+                <td>Cluster the contigs</td>
+            </tr>
+            <tr>
+                <td>DeepVirFinder</td>
+                <td>1.0</td>
+                <td>.sif file</td>
+                <td>Cluster the contigs</td>
+            </tr>
+            <tr>
+                <td>CheckV</td>
+                <td>(info not on hand)</td>
+                <td>.sif file</td>
+                <td>Assess cluster quality</td>
+            </tr>
+            <tr>
+                <td>Contig Annotation Tool (CAT)</td>
+                <td>6.0.1 
+                    <i>(database: 20231120)</i></td>
+                <td>GitHub download</td>
+                <td>Classify ambiguous viral contigs</td>
+            </tr>
+            <tr>
+                <td>seqkit</td>
+                <td>(info not on hand)</td>
+                <td>Pre-installed module</td>
+                <td>Supporting module with many relevant functions</td>
+            </tr>
+        </table>
+    </section>
+
+    <section class="home-about">
+        <h2 class="home-about-title">Installing the Software</h2>
+        <p class="home-about-text">First, we will install and load the software. Scroll as needed to see all the code:</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="contigs_install" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+    </section>
+
+    <section class="home-about">
+        <h2 class="home-about-title">Run the Code</h2>
+
+        <h2 class="home-about-title">Step 1: Generate lists of high-confidence and ambiguous hits.</h2>
+
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 1: VirSorter2</h3>
+        <p class="home-about-text">This will identify viral contigs using the VirSorter2 method.</p>
+
+        <p class="array-note">Note that this is an ARRAY script run PER SAMPLE. 
+            Running as <code style="color: #0b0b0b;">sbatch script.sh</code> will run all array values (i.e. all samples); 
+            individual array values can be run using <code style="color: #0b0b0b;">sbatch --array=0,1 script.sh</code>, etc.</p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="contigs_virsorter2" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 2: DeepVirFinder</h3>
+        <p class="home-about-text">This will cluster the contigs using the DeepVirFinder method.</p>
+        <p class="array-note">Note that this is an ARRAY script run PER SAMPLE. 
+            Running as <code style="color: #0b0b0b;">sbatch script.sh</code> will run all array values (i.e. all samples); 
+            individual array values can be run using <code style="color: #0b0b0b;">sbatch --array=0,1 script.sh</code>, etc.</p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <br>
+        <p class="home-about-text"><i>
+            TROUBLESHOOTING:</i></p>
+        <p class="home-about-text"><i>
+            This tool uses Theano. I don't know much about it, 
+            except that it was a pain in the butt to get working properly.</i></p>
+        <p class="home-about-text"><i>
+            If you're unlucky, one or more of your input files might have an exact 
+            multiple of 100 contigs. This will cause something that looks like an error.
+            Example in the .err file: "ValueError: not enough values to unpack (expected 3, got 0)"
+            This is because DeepVirFinder splits the input into batches of 100 contigs, and if
+            your input file is sorted by contig size, all of the final 100 contigs will be filtered
+            out, causing it to try to process an empty batch. 
+            The end of the .out file should show "processing line [number]", where the number
+            is equal to the total number of lines in the input file. You can test this with the wc
+            command.
+            Check the output file - if the tail looks normal, then you should be safe.</i></p>
+        <div class="box" width="100%">   
+            <pre><code data-script="contigs_dvf" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 3: Filter the Clusters</h3>
+        <p class="home-about-text">First, we will filter each contig list for length.</p>
+        <p class="home-about-text">Then, we will separate the outputs into high-quality and 
+            ambiguous hits using the built-in quality scores from each tool.</p>
+        <p class="home-about-text">
+            The viral criteria are twofold:</p>  
+        <div class="home-about-text">
+            <ul>
+                <li>1. Length >= 5 kb OR (Length >= 1.5 kb AND circular)</li>
+                <li>2. One or more of the following:
+                    <ul>
+                        <li>a. DeepVirFinder score >= 0.9 AND p < 0.05</li>
+                        <br> <!-- Doesn't work without this lol -->
+                        <li>b. VirSorter2 score >= 0.9</li>
+                        <li>c. Contig present in VirSorter2 output AND (DeepVirFinder score >= 0.7 AND p < 0.05)</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="contigs_filter" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+        <!-- ------------------------------------------------------------------------------------------ -->
+
+        <h2 class="home-about-title">Step 2: Validate ambiguous hits, then apply final trim & filter.</h2>
+
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 1: Validate ambiguous hits with CAT</h3>
+        <p class="home-about-text" style="color: red;">WARNING: this script is not well validated compared to the others. 
+            Sanity check all outputs.</p>
+        <p class="home-about-text">The Contig Annotation Tool (CAT) is a tool that is partially designed to
+             taxonomically classify organisms that are not well characterized (or characterized at all). 
+             This is particularly helpful for viruses, since they are not as well understood as bacteria.</p>
+        <p class="home-about-text">The CAT algorithm involves gene calling, mapping of predicted ORFs against a 
+            protein database, and voting-based classification of the entire contig based on classification of 
+            the individual ORFs.</p>
+        <p class="home-about-text">This script runs CAT on all ambiguous hits found per sample. 
+            If there are no ambiguous hits, it skips the file (no fail).</p>
+        <p class="array-note">Note that this is an ARRAY script run PER SAMPLE. 
+            Running as <code style="color: #0b0b0b;">sbatch script.sh</code> will run all array values (i.e. all samples); 
+            individual array values can be run using <code style="color: #0b0b0b;">sbatch --array=0,1 script.sh</code>, etc.</p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="contigs_cat" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 2: Trim/filter with CheckV, then apply final quality filter</h3>
+        <p class="home-about-text">CheckV performs several functions, including trimming leftover non-viral bases and 
+            providing some quality metrics.</p>
+        <p class="home-about-text">Afterward, the processed contigs will be filtered one last time. 
+            These filters are based on the idea that viruses are not well characterized compared to bacteria.
+            Specifically, we will retain contigs that either have viral genes OR don't have host genes OR have a high proportion of unknown genes.
+        </p>
+        <p class="array-note">Note that this is an ARRAY script run PER SAMPLE. 
+            Running as <code style="color: #0b0b0b;">sbatch script.sh</code> will run all array values (i.e. all samples); 
+            individual array values can be run using <code style="color: #0b0b0b;">sbatch --array=0,1 script.sh</code>, etc.</p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="contigs_checkv" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 3: Count the remaining viral contigs per sample</h3>
+        <p class="home-about-text">Paired with prior outputs, this will let you calculate the proportion of contigs that were 
+            viral, the sequencing depth needed to get X unique viral contigs, etc.</p>
+        <p class="home-about-text">The code runs quickly and doesn't usually need to be submitted as a job.</p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="contigs_counts" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+    </section>
+
+    <footer class="home-footer site-footer">
+        <div class="home-footer-inner">
+            <hr class="home-footer-hr" />
+            <p>Developed by Avril Metcalfe-Roach</p>
+            <p>Contact: <a href="mailto:avril.metcalfe-roach@ubc.ca">avril.metcalfe-roach@ubc.ca</a></p>
+            <p>Updated: 12 Aug 2026</p>
+        </div>
+    </footer>
+</body>
+</html>

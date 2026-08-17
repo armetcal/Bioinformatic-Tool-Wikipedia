@@ -1,0 +1,71 @@
+flowchart TB
+ subgraph Step3[" "]
+    C0[RAW CONTIGS]
+
+    C1[identify viral contigs 
+        with VirSorter2
+
+      <i>dsDNAphage,ssDNA</i>   
+      <i>min-score 0.5</i>
+      <i>min-length 1500</i>]
+
+    C2[Identify viral contigs 
+        with DeepVirFinder
+
+      <i>min-length 1500</i>]
+
+    C3a[RAW VIRAL 
+        CONTIGS: 
+
+        VirSorter2]
+
+    C3b[RAW VIRAL 
+        CONTIGS: 
+
+        DeepVirFinder]
+
+    C0 --> C1 --> C3a
+    C0 --> C2 --> C3b
+  end
+
+  subgraph PreviousStep[" "]
+
+    C3d[CIRCULAR CONTIGS]
+
+    C4[Length filter
+
+      <i>length >= 5 kb
+        OR
+        length >= 1.5 kb 
+        & circular</i>]
+
+
+    C0 --> C4
+    C3d --> C4
+  end
+
+  subgraph Step4[" "]
+
+
+
+    C5[Separate into high-confidence 
+        and ambiguous hits
+
+      <i>High-confidence is one or more of:
+      a. DeepVirFinder score >= 0.9 
+          AND p < 0.05
+      b. VirSorter2 score >= 0.9
+      c. contig present in VirSorter2 
+          output AND DeepVirFinder 
+          score >= 0.7 & p < 0.05</i>]
+    C6[HIGH-CONFIDENCE
+        VIRAL CONTIGS]
+    C7[AMBIGUOUS 
+        VIRAL CONTIGS]
+
+    C3a --> C5
+    C3b --> C5
+    C4 --> C5
+    C5 --> C6
+    C5 --> C7
+  end

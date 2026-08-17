@@ -1,0 +1,29 @@
+flowchart TB
+  subgraph Step1[" "]
+    A1[RAW READS]
+    A2[Read cleaning / 
+      trimming with FastP v1.0.1
+
+      <i>ktrim=r tpe tbo 
+      qtrim=rl trimq=20 
+      minlen=50 k=23 
+      mink=11 hdist=1</i>]
+    A3[Human read removal 
+    with Hostile v1.1.0
+
+      <i>Index: human-t2t-
+      hla.argos-bacteria-
+      985_rs-viral-202401_
+      ml-phage-202401</i>]
+    A4[CLEAN READS]
+    A5[COUNT READS 
+        PER SAMPLE]
+    A6[FASTQC 
+        QUALITY CHECK]
+    A7[MULTIQC 
+        SUMMARY REPORT]
+    A1 --> A2 --> A3 --> A4
+    A4 --> A6 --> A7
+    A4 --> A5
+    A1 --> A6
+  end

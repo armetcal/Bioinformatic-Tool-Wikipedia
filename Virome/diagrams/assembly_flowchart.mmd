@@ -1,0 +1,24 @@
+flowchart TB
+  subgraph Step2[" "]
+    B0[CLEAN READS]
+    B1[Assembly with 
+        metaSPAdes
+        
+      <i>kmers: 21,33,55,77</i>]
+
+    B2[RAW CONTIGS]
+
+    B3[QUAST QUALITY CHECK]
+
+    B4[Identify circular 
+        contigs with mummer
+
+      <i>>=100bp overlap with 
+      95pct identity</i>]
+
+    B5[CIRCULAR 
+        CONTIGS]
+
+    B0 --> B1 --> B2 --> B3
+    B2 --> B4 --> B5
+  end

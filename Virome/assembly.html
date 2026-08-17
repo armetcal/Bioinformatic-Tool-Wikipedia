@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metagenomic Tutorials</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/virome.css">
+    <!-- Load code-rendering script -->
+    <script src="js/load-scripts.js"></script>
+    <!-- Mermaid diagrams -->
+    <script src="js/load-mermaid.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- PrismJS: syntax highlighting -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+</head>
+
+<body class="home-page">
+    <header>
+        <a class="logo" href="index.html" style="font-size:18px">Viromics</a>
+        <a class="logo" href="cleaning.html" style="font-size:36px">Step 2: Contig Assembly</a>
+        <nav class="nav__links">
+            <ul>
+                <li><a href="https://github.com/armetcal/BIOINFORMATIC-TOOL-WIKIPEDIA">
+                    <i class="fa fa-github" aria-hidden="true" style="font-size:18px"></i> GitHub
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <br>
+
+    <!-- About -->
+    <section class="home-about">
+        <h2 class="home-about-title">Overview</h2>
+        <p class="home-about-text">This will assemble the cleaned reads into longer contigs using MetaSpades, 
+            assess their quality with Quast, and determine which contigs are circular with MUMmer. 
+            This is analogous to typical MAG assembly of bacterial genomes.</p>
+    </section>
+
+    <div data-mmd="diagrams/assembly_flowchart.mmd" id="diagram" class="mermaid" style="padding: 2rem 6% 0.5rem;"> </div>
+
+    <section class="home-about">
+        <h2 class="home-about-title">Required Software</h2>
+        <p class="home-about-text">The following software was used to run the original scripts. Please update as desired.</p>
+        <p class="home-about-text">Disclaimer: Please note that all scripts are designed to be run in Compute Canada, 
+            which has some software pre-installed as modules. Compute Canada also uses SLURM to run jobs. 
+            Please adjust the code as needed for your system.</p>
+        <table id="cleaning-table" style="width:100%;">
+            <tr>
+                <th>Software</th>
+                <th>Version</th>
+                <th>Format used</th>
+                <th>Purpose</th>
+            </tr>
+            <tr>
+                <td>MetaSpades</td>
+                <td>4.2.0</td>
+                <td>Pre-installed module</td>
+                <td>Assemble contigs from cleaned reads</td>
+            </tr>
+            <tr>
+                <td>QUAST</td>
+                <td>5.2.0</td>
+                <td>Pre-installed module</td>
+                <td>Assess assembly quality</td>
+            </tr>
+            <tr>
+                <td>MUMmer</td>
+                <td>(info not on hand)</td>
+                <td>Pre-installed module</td>
+                <td>Assess read quality</td>
+            </tr>
+            <tr>
+                <td>seqkit</td>
+                <td>(info not on hand)</td>
+                <td>Pre-installed module</td>
+                <td>Supporting module with many relevant functions</td>
+            </tr>
+        </table>
+    </section>
+
+    <section class="home-about">
+        <h2 class="home-about-title">Installing the Software</h2>
+        <p class="home-about-text">No installation is required for the pre-installed modules.</p>
+    </section>
+
+    <section class="home-about">
+        <h2 class="home-about-title">Run the Code</h2>
+        
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 1: Processing the Samples</h3>
+        <p class="home-about-text">This will run all required steps of the pipeline.</p>
+        <p class="array-note">Note that this is an ARRAY script run PER SAMPLE. 
+            Running as <code style="color: #0b0b0b;">sbatch script.sh</code> will run all array values (i.e. all samples); 
+            individual array values can be run using <code style="color: #0b0b0b;">sbatch --array=0,1 script.sh</code>, etc.</p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="scripts/assembly_processing.sh" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 2: Contigs per sample</h3>
+        <p class="home-about-text">This will count how many contigs are in each sample. 
+            It usually doesn't need to be submitted as a job, as it is not computationally intensive - just run directly in the console.</p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="scripts/assembly_counts.sh" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+    </section>
+
+    <footer class="home-footer site-footer">
+        <div class="home-footer-inner">
+            <hr class="home-footer-hr" />
+            <p>Developed by Avril Metcalfe-Roach</p>
+            <p>Contact: <a href="mailto:avril.metcalfe-roach@ubc.ca">avril.metcalfe-roach@ubc.ca</a></p>
+            <p>Updated: 12 Aug 2026</p>
+        </div>
+    </footer>
+</body>
+</html>

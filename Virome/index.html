@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metagenomic Tutorials</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/virome.css">
+    <script src="js/load-mermaid.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+
+<body class="home-page">
+    <header>
+        <a class="logo" href="../index.html" style="font-size:18px">Metagenomic Tutorials</a>
+        <a class="logo" href="index.html" style="font-size:36px">Viromics</a>
+        <nav class="nav__links">
+            <ul>
+                <li><a href="https://github.com/armetcal/BIOINFORMATIC-TOOL-WIKIPEDIA">
+                    <i class="fa fa-github" aria-hidden="true" style="font-size:18px"></i> GitHub
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <br>
+
+    <!-- About -->
+    <section class="home-about">
+        <h2 class="home-about-title">About</h2>
+        <p class="home-about-text" style="font-size:1.4rem">Viromics uses metagenomic sequencing data to identify viral 
+            sequences and characterize their diversity and function.</p>
+        <p class="home-about-text" style="font-size:1.4rem">If run on typical metagenomic data (i.e. no virus-specific 
+            enrichment), then most of the viruses will be bacteriophages and other viruses that are enclosed by bacteria. 
+            Free virus particles are typically washed away during sample processing.</p>
+        <p class="home-about-text" style="font-size:1.4rem">The following flowchart shows the overall workflow for viromics. 
+            The major tools required for each step are listed in parentheses.</p>
+        <p class="home-about-text" style="font-size:1.4rem">Please note that this pipeline is a work in progress, especially 
+            as the field is actively evolving - please treat this as a guideline and check other up-to-date sources. 
+            Much of the pipeline is based upon two key publications:</p>
+        <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7443397" style="font-size:1.4rem">1. The Gut Virome Database Reveals Age-Dependent Patterns of Virome Diversity in the Human Gut (Gregory et. al, 2020)</a>
+        <br>
+        <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12960796" style="font-size:1.4rem">2. Diversity and ecological roles of hidden viral players in groundwater microbiomes (Pratama et. al, 2026)</a>
+    </section>
+
+    <div data-mmd="diagrams/Truncated_Flowchart.mmd" id="diagram" class="mermaid" style="padding: 2rem 6% 0.5rem;"> </div>
+
+    <br>
+    
+    <!-- Individual Steps -->
+    <section class="home-about">
+        <h2 class="home-about-title">Pipeline Steps</h2>
+
+        <a class="logo" href="cleaning.html" style="font-size:18px"><h3 class="home-about-title">1. Read Cleaning</h3></a>
+        <p class="home-about-text" style="font-size:1.4rem">Clean the raw reads using FastP, 
+            remove human reads with Hostile, and check quality with FastQC/MultiQC. 
+            This is analogous to typical bacterial metagenomic pipelines.</p>
+
+        <a class="logo" href="assembly.html" style="font-size:18px"><h3 class="home-about-title">2. Assembly</h3></a>
+        <p class="home-about-text" style="font-size:1.4rem">Assemble the cleaned reads into longer contigs using MetaSpades, 
+            assess their quality with Quast, and determine which contigs are circular with MUMmer. 
+            This is analogous to typical MAG assembly of bacterial genomes.</p>
+
+        <a class="logo" href="contigs.html" style="font-size:18px"><h3 class="home-about-title">3. Identification of Viral Contigs</h3></a>
+        <p class="home-about-text" style="font-size:1.4rem">Identify viral contigs with DeepVirFinder and VirSorter2, 
+            then filter for quality. Validate ambiguous hits with CAT. Trim and filter with CheckV.</p>
+
+        <a class="logo" href="clustering.html" style="font-size:18px"><h3 class="home-about-title">4. Clustering</h3></a>
+        <p class="home-about-text" style="font-size:1.4rem">Use MMSeqs to cluster contigs by genetic similarity. 
+            This is analogous to OTUs or ASVs from 16S sequencing. This step is important for statistics: fewer false positives 
+            (because of sheer number of unclustered contigs) and fewer false negatives (because individual contigs 
+            aren't abundant enough to reach significance by themselves).</p>
+        <p class="home-about-text" style="font-size:1.4rem">CheckV is then used to check cluster quality.</p>
+        <p class="home-about-text" style="font-size:1.4rem">Finally, clusters are separated by size, as small contigs need special processing.</p>
+
+        <a class="logo" href="taxonomy.html" style="font-size:18px"><h3 class="home-about-title">5. Taxonomy & Function</h3></a>
+        <p class="home-about-text" style="font-size:1.4rem">These can be assessed in multiple ways. For large contigs, we use both 
+            VContact3 as well as the MGV database to assign taxonomy, and DRAM-v and MGV for functions.</p>
+
+        <a class="logo" href="abundance.html" style="font-size:18px"><h3 class="home-about-title">6. Contig Abundance</h3></a>
+        <p class="home-about-text" style="font-size:1.4rem">The abundance of each clustered contig is calculated by searching for its 
+            sequence within the raw reads.</p>
+
+        <a class="logo" href="diversity.html" style="font-size:18px"><h3 class="home-about-title">7. Viral Diversity</h3></a>
+        <p class="home-about-text" style="font-size:1.4rem">Viral diversity is assessed using MetaPop. 
+            Not only does this calculate traditional alpha and beta diversity metrics, like in bacterial analyses,
+            but it also assesses microdiversity at the codon/nucleotide level.</p>
+
+        <a class="logo" href="host_prediction.html" style="font-size:18px"><h3 class="home-about-title">8. Host Prediction</h3></a>
+        <p class="home-about-text" style="font-size:1.4rem">Most viruses detected using traditional metagenomic sequencng are bacteriophages. 
+            Most bacteriophages are specific to one bacterial host. We will use iPHoP, which aggregates the results of several tools to 
+            provide a composite host prediction.</p>
+    </section>
+
+    <footer class="home-footer site-footer">
+        <div class="home-footer-inner">
+            <hr class="home-footer-hr" />
+            <p>Developed by Avril Metcalfe-Roach</p>
+            <p>Contact: <a href="mailto:avril.metcalfe-roach@ubc.ca">avril.metcalfe-roach@ubc.ca</a></p>
+            <p>Updated: 12 Aug 2026</p>
+        </div>
+    </footer>
+</body>
+</html>

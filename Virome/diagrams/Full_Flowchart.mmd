@@ -1,0 +1,166 @@
+flowchart TB
+  subgraph Step1["READ CLEANING"]
+    A1[FASTQC QUALITY CHECK]
+    A2[Read cleaning / trimming with FastP v0.24.0
+*ktrim=r tpe tbo qtrim=rl trimq=20 minlen=50 k=23 mink=11 hdist=1*]
+    A3[Human read removal with Hostile v1.1.0
+*Index: human-t2t-hla.argos-bacteria-985_rs-viral-202401_ml-phage-202401*]
+    A4[Count reads per sample]
+    A5[FASTQC QUALITY CHECK]
+    A1 --> A2 --> A3 --> A4
+    A3 --> A5
+  end
+
+  subgraph Step2["ASSEMBLY"]
+    B1[Assembly with metaSPAdes
+*kmers: 21,33,55,77*]
+    B2[QUAST QUALITY CHECK]
+    B3[Identify circular contigs with mummer
+*>=100bp overlap with 95pct identity*]
+    B1 --> B2
+    B1 --> B3
+  end
+
+  subgraph Step3["IDENTIFICATION OF VIRAL CONTIGS"]
+    C1[identify viral contigs with VirSorter2
+*dsDNAphage,ssDNA*   
+*min-score 0.5*
+*min-length 1500*]
+    C2[Identify viral contigs with DeepVirFinder
+*min-length 1500*]
+    C3[Length filter
+*length >= 5 kb
+OR
+length >= 1.5 kb AND circular*]
+    C4[Separate into high-confidence and ambiguous
+*High-confidence is one or more of:
+a. DeepVirFinder score >= 0.9 AND p < 0.05
+b. VirSorter2 score >= 0.9
+c. contig present in VirSorter2 output AND DeepVirFinder score >= 0.7 and p < 0.05*
+]
+    C5[High-quality contigs]
+    C6[Ambiguous contigs]
+    C7[Validation with CAT
+*Viral contig is EITHER of:
+a. <40pct of contig classified as bacterial, archaeal, or eukaryotic, based on avg gene size of 1000
+b. Classified as eukaryotic viral contig by CAT*]
+    C8[Trim and filter with CheckV end-to-end]
+    C9[Final contig filter
+*One or more of:
+a. n_viral_genes > 0
+b. n_viral_genes == 0 AND n_host_genes == 0
+c. length >= 1000
+d. pct_unknown_genes >= 75*]
+    C1 --> C3
+    C2 --> C3 --> C4
+    C4 --> C5
+    C4 --> C6 --> C7
+    C5 --> C8
+    C7 --> C8
+    C8 --> C9
+  end
+
+  subgraph Step4["CLUSTERING"]
+    D1[Combine contigs from all samples]
+    D2[Cluster contigs with MMseqs2 easy-cluster v17-b804f
+*95pct identity, 80pct coverage*]
+    D3[Representative sequence quality check with CheckV]
+    D4[Separate rep-seqs by size]
+    D5[10kb+]
+    D6[<10kb]
+    D1 --> D2 --> D3
+    D2 --> D4
+    D4 --> D5
+    D4 --> D6
+  end
+
+  subgraph Step5["TAXONOMY & FUNCTION"]
+    E1[**TAX:** Align contigs with MGV database usng MMSeqs2 v17-b804f
+*Best hit: highest bitscore, then lowest evalue*]
+    E2[**TAX & FUNCTION & LIFESTYLE:** Predict proteins with Prodigal, align with MGV database using MMSeqs2 v17-b804f
+*Best hit: highest bitscore, then lowest evalue*]
+    E3[**TAX:** Clustering approach with vContact3
+*Database: 230*]
+    E4[**TAX:** Small contig classification TO DO!!!!!!!!!!!!!!]
+    E5[**FUNCTION:** VContact3 prep-for-dramv]
+    E6[DRAM-v annotate]
+    E7[DRAM-v distill]
+  end
+
+  subgraph Step6["CONTIG ABUNDANCE"]
+    F1[CoverM
+*min-read-percent-identity 0.95
+min-read-aligned-percent 0.75
+min-covered-fraction 0.7
+m trimmed_mean
+discard-unmapped*]
+  end
+
+  subgraph Step7["VIRAL DIVERSITY"]
+    G1[Create indexed and sorted .bam files: minimap2, samtools]
+    G2[Generate gene calls for rep-seqs with Prodigal]
+    G3[Calculate diversity with MetaPop
+*id_min 95, min_len 30
+min_cov 50, min_dep 10
+min_obs 4, min_pct 1
+min_qual 20
+subsample_size 10*]
+    G1 --> G2 --> G3
+  end
+
+  subgraph Step8["HOST PREDICTION"]
+    H1[Bacterial/archaeal hosts with iPHoP predict
+*Database: Jun_2025_pub_rw*]
+    H2[Identify CRISPR spacers with MinCED
+*minNR 3*]
+    H3[Align viral contigs to spacers with blastn
+*task blastn-short
+word_size 7
+evalue 1e-5
+reward 1 penalty -1
+ungapped
+outfmt: 6 qseqid sseqid pident length mismatch qlen qstart qend sstart send evalue bitscore qcovs
+dust no*]
+    H4[Filter matches
+*3 strictness levels:
+1. pid >=95pct, qcovs >=90pct
+2. no mismatches, qcovs >=90pct
+3. no mismatches, qcovs >=100pct*]
+    H2 --> H3 --> H4
+  end
+
+
+  A3 --> B1
+
+  B1 --> C1
+  B1 --> C2
+
+  B3 --> C3
+  
+  C9 --> D1 
+
+  D5 --> E1
+  D5 --> E2
+  D5 --> E3
+  D5 --> E5
+
+  D6 --> E4
+
+  
+  E5 --> E6 --> E7
+
+  A3 --> F1
+  D2 --> F1
+
+  A3 --> G1
+  D2 --> G1
+
+  D2 --> G2
+
+  A4 --> G3
+  G1 --> G3
+
+  D2 --> H1
+
+  B1 --> H2
+  D5 --> H2
