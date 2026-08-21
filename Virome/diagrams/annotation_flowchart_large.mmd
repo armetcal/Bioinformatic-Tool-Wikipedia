@@ -1,0 +1,40 @@
+flowchart TB
+
+  subgraph Step5["<h3>LARGE CONTIGS</h3>"]
+    E0[>10 kb contigs]
+
+    E1[TAXONOMY
+
+        Clustering approach with vContact3
+        <i>Database: 230</i>]
+
+    E2[TAXONOMY 
+
+        Align contigs with MGV database using MMSeqs2
+
+        <i>Best hit: highest bitscore, then lowest evalue</i>]
+
+    E3[TAXONOMY & FUNCTION & LIFESTYLE
+
+    Predict proteins with Prodigal, 
+    align with MGV database using MMSeqs2
+
+    <i>Best hit: highest bitscore, then lowest evalue</i>]
+
+    E4[FUNCTIONS
+    
+    VContact3 prep-for-dramv]
+
+    E5[DRAM-v annotate
+    
+    <i>min contig size: 
+    1000 bp</i>]
+    E6[DRAM-v distill]
+  end
+
+  E0 --> E1
+  E0 --> E2
+  E0 --> E3
+  E0 --> E4
+
+  E4 --> E5 --> E6

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metagenomic Tutorials</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/virome.css">
+    <!-- Load code-rendering script -->
+    <script src="js/load-scripts.js"></script>
+    <!-- Mermaid diagrams -->
+    <script src="js/load-mermaid.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- PrismJS: syntax highlighting -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+</head>
+
+<body class="home-page">
+    <header>
+        <a class="logo" href="index.html" style="font-size:18px">Viromics</a>
+        <a class="logo" href="host_prediction.html" style="font-size:36px">Step 8: Host Prediction</a>
+        <nav class="nav__links">
+            <ul>
+                <li><a href="https://github.com/armetcal/BIOINFORMATIC-TOOL-WIKIPEDIA">
+                    <i class="fa fa-github" aria-hidden="true" style="font-size:18px"></i> GitHub
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <br>
+
+    <!-- About -->
+    <section class="home-about">
+        <h2 class="home-about-title">Overview</h2>
+        <p class="home-about-text">Most viruses detected using traditional metagenomic sequencng are bacteriophages. 
+            Most bacteriophages are specific to one bacterial host. We will use iPHoP, which aggregates the results of several tools to 
+            provide a composite host prediction.</p>
+        <p class="home-about-text">iPHoP is a two-step process. 
+            First, it computes raw host predictions for each chunk of sequences using six different tools. 
+            Then, it aggregates these predictions into final host assignments. 
+            It's not smart enough to skip the compute step if classification fails, but each step can be run separately, which we'll do below.</p>
+
+        <p class="home-about-text" style="color: white;"><strong>Note: iPHoP is only run on LARGE rep-seqs (>10 kb). 
+            This output was produced during the clustering step.</strong></p>
+        <p class="home-about-text" style="color: white;"><strong>Note #2: When analyzing in R, only the top hit should be used for each virus 
+            (somewhat contentious, but currently best practice).</strong></p>
+    </section>
+
+    <section class="home-about">
+        <div data-mmd="diagrams/host_prediction_flowchart.mmd" id="diagram" class="mermaid" style="padding: 0rem 0% 0rem; max-width: 300px !important;"> </div>    
+    </section>
+
+    <section class="home-about">
+        <h2 class="home-about-title">Required Software</h2>
+        <p class="home-about-text">The following software was used to run the original scripts. Please update as desired.</p>
+        <p class="home-about-text">Disclaimer: Please note that all scripts are designed to be run in Compute Canada, 
+            which has some software pre-installed as modules. Compute Canada also uses SLURM to run jobs. 
+            Please adjust the code as needed for your system.</p>
+        <table id="cleaning-table" style="width:100%;">
+            <tr>
+                <th>Software</th>
+                <th>Version</th>
+                <th>Format used</th>
+                <th>Purpose</th>
+            </tr>
+            <tr>
+                <td>iPHoP</td>
+                <td>1.4.2
+                    <br>
+                    Database: Jun25_rw
+                </td>
+                <td>Installed directly into a new conda environment</td>
+                <td>Host prediction</td>
+            </tr>
+        </table>
+    </section>
+
+    <section class="home-about">
+        <h2 class="home-about-title">Installing the Software</h2>
+        <div class="box" width="100%">   
+            <pre><code data-script="host_prediction_install" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+    </section>
+
+    <section class="home-about">
+
+        <h2 class="home-about-title">Run the Code</h2>
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 1: Calculate the number of array jobs needed</h3>
+
+        <p class="home-about-text">iPHoP struggles when given too many representative sequences - the program will stall.
+            I therefore break the rep-seqs into chunks of 500 sequences each to optimize the number of jobs with the number of sequences.</p>
+        <p class="home-about-text">This first script is a planning script: it </p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <p class="array-note">Note that this is an ARRAY script run PER SAMPLE. 
+            Running as <code style="color: #0b0b0b;">sbatch script.sh</code> will run all array values (i.e. all samples); 
+            individual array values can be run using <code style="color: #0b0b0b;">sbatch --array=0,1 script.sh</code>, etc.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="host_prediction_plan" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+    </section>
+
+    <section class="home-about">
+
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 2: Run the compute step of iPHoP</h3>
+
+        <p class="home-about-text">The compute step computes raw host predictions for each chunk of sequences using six different tools.</p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <p class="array-note">Note that this is an ARRAY script run PER SAMPLE. 
+            Running as <code style="color: #0b0b0b;">sbatch script.sh</code> will run all array values (i.e. all samples); 
+            individual array values can be run using <code style="color: #0b0b0b;">sbatch --array=0,1 script.sh</code>, etc.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="host_prediction_compute" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+    </section>
+
+    <section class="home-about">
+
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 3: Run the classify step of iPHoP</h3>
+
+        <p class="home-about-text">The classify step aggregates the raw host predictions into final host assignments.</p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <p class="array-note">Note that this is an ARRAY script run PER SAMPLE. 
+            Running as <code style="color: #0b0b0b;">sbatch script.sh</code> will run all array values (i.e. all samples); 
+            individual array values can be run using <code style="color: #0b0b0b;">sbatch --array=0,1 script.sh</code>, etc.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="host_prediction_classify" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+    </section>
+
+    <section class="home-about">
+        <!-- Step navigation -->
+        <div class="step-nav">
+            <a id="prev-step" class="btn btn-default step-btn" href="diversity.html">← Previous: Diversity</a>
+            <!-- This is the final step-->
+            <!--<a id="next-step" class="btn btn-primary step-btn pull-right" href="#">Next Step →</a>-->
+        </div>
+    </section>
+
+    <br>
+
+    <footer class="home-footer site-footer">
+        <div class="home-footer-inner">
+            <hr class="home-footer-hr" />
+            <p>Developed by Avril Metcalfe-Roach</p>
+            <p>Contact: <a href="mailto:avril.metcalfe-roach@ubc.ca">avril.metcalfe-roach@ubc.ca</a></p>
+            <p>Updated: 12 Aug 2026</p>
+        </div>
+    </footer>
+</body>
+</html>

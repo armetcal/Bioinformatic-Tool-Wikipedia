@@ -16,14 +16,19 @@ flowchart TB
       985_rs-viral-202401_
       ml-phage-202401</i>]
     A4[CLEAN READS]
-    A5[COUNT READS 
-        PER SAMPLE]
     A6[FASTQC 
-        QUALITY CHECK]
+        QUALITY CHECK 
+
+        <i>1 file/sample</i>]
     A7[MULTIQC 
-        SUMMARY REPORT]
+        SUMMARY REPORT 
+
+        <i>1 file/cohort</i>]
+    A8[READ COUNTS 
+
+        <i>1 file/cohort</i>]
     A1 --> A2 --> A3 --> A4
     A4 --> A6 --> A7
-    A4 --> A5
+    A4 --> A8
     A1 --> A6
   end

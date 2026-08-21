@@ -112,13 +112,24 @@
             <pre><code data-script="cleaning_processing" class="language-bash" style="font-size:1.2rem;"></code></pre>
         </div>
 
-        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 2: Generating the quality report</h3>
-        <p class="home-about-text">This will combine all the FastQC quality reports and produce a single HTML report file (much easier to parse).</p>
+        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 2: Generating the quality report and read counts</h3>
+        <p class="home-about-text">This will combine all the FastQC quality reports and produce a single HTML report file (much easier to parse). 
+            It will also generate a clean-read count file, where the sample names will match the Hostile output names (i.e. the clean reads).</p>
         <p class="home-about-text">Be sure to change all file paths to match your system.</p>
         <div class="box" width="100%">   
             <pre><code data-script="cleaning_qc" class="language-bash" style="font-size:1.2rem;"></code></pre>
         </div>
     </section>
+
+    <section class="home-about">
+        <!-- Step navigation -->
+        <div class="step-nav">
+            <!-- <a id="prev-step" class="btn btn-default step-btn" href="">← Previous:</a> -->
+            <a id="next-step" class="btn btn-primary step-btn pull-right" href="assembly.html">Next: Assembly →</a>
+        </div>
+    </section>
+
+    <br>
 
     <footer class="home-footer site-footer">
         <div class="home-footer-inner">

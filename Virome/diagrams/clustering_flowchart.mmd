@@ -1,0 +1,39 @@
+flowchart TB
+  subgraph Step4[" "]
+    D0[FILTERED
+        VIRAL CONTIGS
+        
+        <i>1 file/sample</i>]
+    D1[Combine contigs
+        from all samples]
+    D1a[DEREPLICATED
+            CONTIGS
+        
+        <i>1 file/cohort</i>]
+
+    D2[Cluster contigs 
+        with MMseqs2 
+        
+        <i>easy-cluster v17-b804f
+            95pct identity, 
+            80pct coverage</i>]
+
+    D2a[REPRESENTATIVE
+            SEQUENCES
+
+        <i>1 file/cohort</i>]
+
+    D3[Representative 
+        sequence quality 
+        check with CheckV]
+    D4[Separate by size]
+    D5[10 kb+]
+    D6[<10 kb]
+    
+    D0 --> D1 --> D1a --> D2 --> D2a --> D3
+    D2a --> D4
+    D4 --> D5
+    D4 --> D6
+  end
+
+  

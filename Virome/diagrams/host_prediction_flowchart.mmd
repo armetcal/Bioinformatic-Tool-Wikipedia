@@ -1,0 +1,25 @@
+flowchart TB
+
+  subgraph Step8[" "]
+    I0[LARGE REP-SEQS: >10 kb
+        <i>From clustering step</i>]
+
+    H0[Calculate number 
+        of jobs needed
+        for array submission]
+
+    H1[iPHoP predict: compute step]
+
+    O0[RAW HOST PREDICTIONS
+        <i>1/array job</i>]
+    H2[iPHoP predict: classify step]
+
+    O1[FINAL HOST PREDICTIONS
+        <i>1/array job</i>]
+  end
+
+  subgraph Step10[" "]
+    O2[<i>Combine results in R</i>]
+  end
+
+    I0 --> H0 --> H1 --> O0 --> H2 --> O1 --> O2

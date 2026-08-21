@@ -24,7 +24,7 @@ date
 # Create output directories
 mkdir -p "$SAVE_LOC" "$LOG_DIR"
 
-# Load MEGAHIT module
+# Load MetaSpades module
 module load StdEnv/2023 spades/4.2.0
 
 # Get list of unique sample prefixes

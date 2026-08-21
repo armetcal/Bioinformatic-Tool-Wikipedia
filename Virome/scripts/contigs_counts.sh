@@ -10,7 +10,7 @@ echo -e "Sample\tvOTU_Count" > "$SAVE_LOC/vOTU_counts.tsv"
 
 for SAMPLE in "${FOLDERS[@]}"; do
     # SAMPLE=${FOLDERS[0]}
-    CONTIG_FILE="$SCRATCH_ROOT/vOTUs/checkv_out/$SAMPLE/highconf/${SAMPLE}_highconf_checkv_retained.fasta"
+    CONTIG_FILE="$SCRATCH_ROOT/vOTUs/checkv_out/${SAMPLE}/${SAMPLE}_all_highqual_viral.fasta"
     # Calculate the total number of vOTUs
     n=$(awk '/^>/{sub(/^>/,""); print}' "$CONTIG_FILE" | wc -l)
     echo -e "$SAMPLE\t$n" >> "$SAVE_LOC/vOTU_counts.tsv"

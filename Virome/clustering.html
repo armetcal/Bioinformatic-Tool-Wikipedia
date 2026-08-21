@@ -26,7 +26,7 @@
 <body class="home-page">
     <header>
         <a class="logo" href="index.html" style="font-size:18px">Viromics</a>
-        <a class="logo" href="assembly.html" style="font-size:36px">Step 2: Contig Assembly</a>
+        <a class="logo" href="clustering.html" style="font-size:36px">Step 4: Clustering Viral Contigs</a>
         <nav class="nav__links">
             <ul>
                 <li><a href="https://github.com/armetcal/BIOINFORMATIC-TOOL-WIKIPEDIA">
@@ -41,12 +41,18 @@
     <!-- About -->
     <section class="home-about">
         <h2 class="home-about-title">Overview</h2>
-        <p class="home-about-text">This will assemble the cleaned reads into longer contigs using MetaSpades, 
-            assess their quality with Quast, and determine which contigs are circular with MUMmer. 
-            This is analogous to typical MAG assembly of bacterial genomes.</p>
+        <p class="home-about-text">This uses MMSeqs to cluster contigs by genetic similarity. 
+            This is analogous to creating OTUs or ASVs during 16S sequencing.</p>
+        <p class="home-about-text">Clustering is important for statistics. Individual contigs are usually too rare to run reliable statistics, 
+            and tiny differences in contig sequences are unlikely to be biologically meaningful. 
+            Therefore, clustering gives you the best of both worlds:
+            fewer false positives (by reducing the sheer number of contigs) and 
+            fewer false negatives (since clustering gives you a better abundance estimate for any meaningfully distinct group of contigs, improving statistical power).</p>
     </section>
 
-    <div data-mmd="diagrams/assembly_flowchart.mmd" id="diagram" class="mermaid" style="padding: 2rem 6% 0.5rem;"> </div>
+    <section class="home-about">
+        <div data-mmd="diagrams/clustering_flowchart.mmd" id="diagram" class="mermaid" style="padding: 0rem 0% 0rem; max-width: 600px !important;"> </div>    
+    </section>
 
     <section class="home-about">
         <h2 class="home-about-title">Required Software</h2>
@@ -62,64 +68,56 @@
                 <th>Purpose</th>
             </tr>
             <tr>
-                <td>MetaSpades</td>
-                <td>4.2.0</td>
+                <td>MMSeqs2</td>
+                <td>17-b804f</td>
                 <td>Pre-installed module</td>
-                <td>Assemble contigs from cleaned reads</td>
+                <td>Cluster the contigs</td>
             </tr>
             <tr>
-                <td>QUAST</td>
-                <td>5.2.0</td>
+                <td>cudacore</td>
+                <td>.12.6.3</td>
                 <td>Pre-installed module</td>
-                <td>Assess assembly quality</td>
+                <td>MMSeqs2 helper functions</td>
             </tr>
             <tr>
-                <td>MUMmer</td>
+                <td>CheckV</td>
                 <td>(info not on hand)</td>
-                <td>Pre-installed module</td>
-                <td>Assess read quality</td>
+                <td>.sif file</td>
+                <td>Assess cluster quality</td>
             </tr>
             <tr>
                 <td>seqkit</td>
                 <td>(info not on hand)</td>
                 <td>Pre-installed module</td>
-                <td>Supporting module with many relevant functions</td>
+                <td>Separate clusters by size</td>
             </tr>
         </table>
     </section>
 
     <section class="home-about">
         <h2 class="home-about-title">Installing the Software</h2>
-        <p class="home-about-text">No installation is required for the pre-installed modules.</p>
+        <p class="home-about-text">No new installations are needed here since MMSeqs2 and cudacore are pre-installed. 
+            For CheckV installation, <a href="contigs.html">see the previous step (Identifying Viral Contigs).</a></p>
     </section>
 
     <section class="home-about">
+
         <h2 class="home-about-title">Run the Code</h2>
-        
-        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 1: Processing the Samples</h3>
-        <p class="home-about-text">This will run all required steps of the pipeline.</p>
-        <p class="array-note">Note that this is an ARRAY script run PER SAMPLE. 
-            Running as <code style="color: #0b0b0b;">sbatch script.sh</code> will run all array values (i.e. all samples); 
-            individual array values can be run using <code style="color: #0b0b0b;">sbatch --array=0,1 script.sh</code>, etc.</p>
+
+        <p class="home-about-text">This will run all steps of the clustering pipeline.</p>
         <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+
         <div class="box" width="100%">   
-            <pre><code data-script="assembly_processing" class="language-bash" style="font-size:1.2rem;"></code></pre>
+            <pre><code data-script="clustering" class="language-bash" style="font-size:1.2rem;"></code></pre>
         </div>
 
-        <h3 class="home-about-title"; style="font-size: 1.4rem;">Part 2: Contigs per sample</h3>
-        <p class="home-about-text">This will count how many contigs are in each sample. 
-            It usually doesn't need to be submitted as a job, as it is not computationally intensive - just run directly in the console.</p>
-        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
-        <div class="box" width="100%">   
-            <pre><code data-script="assembly_counts" class="language-bash" style="font-size:1.2rem;"></code></pre>
-        </div>
     </section>
 
     <section class="home-about">
         <!-- Step navigation -->
         <div class="step-nav">
-            <a id="prev-step" class="btn btn-default step-btn" href="cleaning.html">← Previous: Read Cleaning</a>
-            <a id="next-step" class="btn btn-primary step-btn pull-right" href="contigs.html">Next: Viral Contigs →</a>
+            <a id="prev-step" class="btn btn-default step-btn" href="contigs.html">← Previous: Contigs</a>
+            <a id="next-step" class="btn btn-primary step-btn pull-right" href="annotation.html">Next: Taxonomy & Function →</a>
         </div>
     </section>
 

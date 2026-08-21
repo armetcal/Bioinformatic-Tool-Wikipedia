@@ -1,8 +1,10 @@
 PROJECT_ROOT="/home/armetcal/scratch/cmmi/virome/mgx"
 SAVE_LOC="$PROJECT_ROOT/metaspades_out"
 
-# Get list of unique sample prefixes
+# Remove any previous runs
 rm -f "$SAVE_LOC/contig_counts.tsv"
+
+# Get list of unique sample prefixes
 mapfile -t SAMPLES < <(basename -a "$SAVE_LOC"/*)
 
 # Create an empty summary file

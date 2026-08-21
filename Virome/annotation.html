@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metagenomic Tutorials</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/virome.css">
+    <!-- Load code-rendering script -->
+    <script src="js/load-scripts.js"></script>
+    <!-- Mermaid diagrams -->
+    <script src="js/load-mermaid.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- PrismJS: syntax highlighting -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+</head>
+
+<body class="home-page">
+    <header>
+        <a class="logo" href="index.html" style="font-size:18px">Viromics</a>
+        <a class="logo" href="annotation.html" style="font-size:36px">Step 5: Taxonomy & Functions</a>
+        <nav class="nav__links">
+            <ul>
+                <li><a href="https://github.com/armetcal/BIOINFORMATIC-TOOL-WIKIPEDIA">
+                    <i class="fa fa-github" aria-hidden="true" style="font-size:18px"></i> GitHub
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <br>
+
+    <!-- About -->
+    <section class="home-about">
+        <h2 class="home-about-title">Overview</h2>
+        <p class="home-about-text">These scripts annotate the clusters using multiple techniques and 
+            databases in order to assign taxonomy and functions.</p>
+        <p class="home-about-text" style="color:yellow;">WARNING: More than most of the other steps, this part is a work in progress. 
+            For starters, it currently only covers large contigs (>10 kb). 
+            It has also been recommended to me to try an alternative tool to DRAM-v for functional annotation, 
+            but I haven't had the chance to try/implement it yet. 
+            Here's a link to the relevant paper for more info: <a href="https://link.springer.com/article/10.1186/s40168-024-01876-z">https://link.springer.com/article/10.1186/s40168-024-01876-z</a></p>
+        <p class="home-about-text"></p>
+    </section>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   -->
+
+    <section class="home-about">
+
+        <h3 class="home-about-title" style="font-size:2rem">Large Contig Annotation</h3>
+
+        <p class="home-about-text">Here are the annotation techniques we'll cover below:</p>
+        <div data-mmd="diagrams/annotation_flowchart_large.mmd" id="diagram" class="mermaid" style="padding: 0rem 0% 0rem; max-width: 600px !important;"> </div>    
+
+        <h2 class="home-about-title">Required Software</h2>
+        <p class="home-about-text">The following software was used to run the original scripts. Please update as desired.</p>
+        <p class="home-about-text">Disclaimer: Please note that all scripts are designed to be run in Compute Canada, 
+            which has some software pre-installed as modules. Compute Canada also uses SLURM to run jobs. 
+            Please adjust the code as needed for your system.</p>
+        <table id="cleaning-table" style="width:100%;">
+            <tr>
+                <th>Software</th>
+                <th>Version</th>
+                <th>Format used</th>
+                <th>Purpose</th>
+            </tr>
+            <tr>
+                <td>VContact3</td>
+                <td>Software: 3.0<br>
+                    Database: 232</td>
+                <td>.sif file<br>(conda install available too)</td>
+                <td>Taxonomic annotation</td>
+            </tr>
+            <tr>
+                <td>MGV database</td>
+                <td>1.0_2021_07_08</td>
+                <td>Downloaded database</td>
+                <td>Repository of all known viral genomes<br>(taxonomy & function)</td>
+            </tr>
+            <tr>
+                <td>MMSeqs2</td>
+                <td>17-b804f</td>
+                <td>Pre-installed module</td>
+                <td>Cluster the contigs</td>
+            </tr>
+            <tr>
+                <td>cudacore</td>
+                <td>.12.6.3</td>
+                <td>Pre-installed module</td>
+                <td>MMSeqs2 helper functions</td>
+            </tr>
+            <tr>
+                <td>DRAM-v</td>
+                <td>(info not on hand)</td>
+                <td>Conda environment</td>
+                <td>Functional annotation</td>
+            </tr>
+            <tr>
+                <td>VirSorter2</td>
+                <td>(info not on hand)</td>
+                <td>.sif file</td>
+                <td>Special function that<br>preprocesses data for DRAM-v</td>
+            </tr>
+        </table>
+    </section>
+
+    <section class="home-about" id="vcontact3">
+
+        <h2 class="home-about-title" style="font-size:1.8rem; color:whitesmoke">Taxonomic Annotation with VContact3</h2>
+
+        <h2 class="home-about-title">Install the Software</h2>
+        <div class="box" width="100%">   
+            <pre><code data-script="annotation_vcontact3_install" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+        <h2 class="home-about-title">Run the Code</h2>
+
+        <p class="home-about-text">Be sure to change all file paths to match your system. 
+            If you want to use a conda environment, you'll need to edit the code a bit.</p>
+
+        <div class="box" width="100%">   
+            <pre><code data-script="annotation_vcontact3_run" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+    </section>
+
+    <section class="home-about" id="mgv">
+
+        <h2 class="home-about-title" style="font-size:1.8rem; color:whitesmoke">Annotation by alignment with the MGV database</h2>
+
+        <p>The MGV database was first published in 2021 by <a href="https://www.nature.com/articles/s41564-021-00928-6#Sec9">Nayfach et. al</a> with the goal of compiling all known viral genomes. 
+            It provides a range of useful outputs: taxonomy, proteins, information about which proteins are 
+            considered auxiliary metabolic genes, and whether the virus is predicted to be virulent or not.</p>
+
+        <p>There are a few different ways the database can be used. We'll run both:</p>
+        <ul>
+            <li>Use MMSeqs to align the rep seqs with the database contigs (taxonomic approach)</li>
+            <li>Use MMSeqs to align the rep seq proteins with the database contigs' proteins (functional approach)</li>
+        </ul>
+
+        <h2 class="home-about-title">Install the Software</h2>
+        <div class="box" width="100%">   
+            <pre><code data-script="annotation_mgv_install" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+        <h2 class="home-about-title">Run the Code</h2>
+
+        <h2 class="home-about-title">Part 1: Taxonomic Alignment</h2>
+        <p class="home-about-text">Be sure to change all file paths to match your system. 
+            If you want to use a conda environment, you'll need to edit the code a bit.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="annotation_mgv_run1" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+        <h2 class="home-about-title">Part 2: Functional Alignment</h2>
+        <p class="home-about-text">Be sure to change all file paths to match your system. 
+            If you want to use a conda environment, you'll need to edit the code a bit.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="annotation_mgv_run2" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+    </section>
+
+    <section class="home-about" id="dramv">
+
+        <h2 class="home-about-title" style="font-size:1.8rem; color:whitesmoke">Functional annotation with DRAM-v</h2>
+
+        <p>DRAM-v is a common tool for the functional annotation of viral genomes.</p>
+        <p>Note that an alternative tool was recommended to me (see notes at top of page), 
+            but I haven't had the chance to try it yet.</p>
+
+        <h2 class="home-about-title">Install the Software</h2>
+        <p>In my experience, installing DRAM-v is a huge pain because it's broken in multiple places 
+            (at least, it is when you install it on Compute Canada). My installation is shown below, 
+            but be prepared to troubleshoot if anything looks weird.</p>
+        <p>As you can see, there are many steps, including downloading the reference databases which takes a long time.</p>
+        <p>For VirSorter2 installation, please see <a href="contigs.html">the viral contig identification step.</a></p>
+        <div class="box" width="100%">   
+            <pre><code data-script="annotation_dramv_install" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+        <h2 class="home-about-title">Run the Code</h2>
+        <p class="home-about-text">All steps of the DRAM-v pipeline are included in the below script.</p>
+        <p class="home-about-text">Be sure to change all file paths to match your system.</p>
+        <div class="box" width="100%">   
+            <pre><code data-script="annotation_dramv_run" class="language-bash" style="font-size:1.2rem;"></code></pre>
+        </div>
+
+    </section>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   -->
+
+    <section class="home-about">
+
+        <h3 class="home-about-title" style="font-size:2rem">Small Contig Annotation</h3>
+
+        <p class="home-about-text">Still under construction, sorry!</p>
+        <div data-mmd="diagrams/annotation_flowchart_small.mmd" id="diagram" class="mermaid" style="padding: 0rem 0% 0rem; max-width: 600px !important;"> </div>
+    </section>
+
+    <section class="home-about">
+        <!-- Step navigation -->
+        <div class="step-nav">
+            <a id="prev-step" class="btn btn-default step-btn" href="clustering.html">← Previous: Clustering</a>
+            <a id="next-step" class="btn btn-primary step-btn pull-right" href="abundance.html">Next: Abundance →</a>
+        </div>
+    </section>
+
+    <br>
+
+    <footer class="home-footer site-footer">
+        <div class="home-footer-inner">
+            <hr class="home-footer-hr" />
+            <p>Developed by Avril Metcalfe-Roach</p>
+            <p>Contact: <a href="mailto:avril.metcalfe-roach@ubc.ca">avril.metcalfe-roach@ubc.ca</a></p>
+            <p>Updated: 12 Aug 2026</p>
+        </div>
+    </footer>
+</body>
+</html>

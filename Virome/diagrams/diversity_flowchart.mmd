@@ -1,0 +1,72 @@
+flowchart TB
+
+  subgraph Step0[" "]
+      I0[CLEAN READS
+      
+              <i>from cleaning step</i>]
+      
+      I1[REPRESENTATIVE SEQUENCES
+      
+              <i>from clustering step</i>
+              <i>NOT separated by size</i>]
+  end
+
+  subgraph Step1[" "]
+    G1[Map clean reads to 
+        representative sequences
+        with minimap2 and samtools]
+
+    G2[Index sorted .bam 
+          files with samtools]
+
+    O1[.BAM FILES
+
+          <i>1/sample</i>]
+  end
+
+  subgraph Step2[" "]
+    G3[Generate individual 
+            FASTA files for 
+            each rep-seq]
+      
+    O2[REP-SEQ DIRECTORY]
+      
+    O3[READ COUNTS
+
+        <i>MetaPop format,
+        1 file/cohort</i>]
+  end
+ 
+  subgraph Step3[" "]
+
+    G4[Generate gene calls 
+      for rep-seqs with Prodigal]
+
+    O4[GENE CALLS
+      
+      <i>1 file/cohort</i>]
+    
+    G5[Calculate diversity with MetaPop
+
+      <i>id_min 95, min_len 30
+      min_cov 50, min_dep 10
+      min_obs 4, min_pct 1
+      min_qual 20
+      subsample_size 10</i>]
+
+    O5[DIVERSITY METRICS
+
+        <i>1 folder/cohort</i>]
+  end
+
+I0 --> G1
+I1 --> G1 --> G2 --> O1
+I1 --> G3 --> O2
+I0 --> O3
+
+O2 --> G4 --> O4
+
+O1 --> G5 --> O5
+I1 --> G5
+O3 --> G5
+O4 --> G5

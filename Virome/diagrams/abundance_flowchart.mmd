@@ -1,0 +1,26 @@
+flowchart TB
+
+  subgraph Step6[" "]
+    F0[CLEAN READS
+
+        <i>from cleaning step</i>]
+
+    F1[REPRESENTATIVE SEQUENCES
+
+        <i>from clustering step</i>
+        <i>NOT separated by size</i>]
+
+    F2[CoverM
+        
+        <i>min-read-percent-identity 0.95
+        min-read-aligned-percent 0.75
+        min-covered-fraction 0.7
+        m trimmed_mean
+        discard-unmapped</i>]
+
+    F3[ABUNDANCE TABLES]
+  end
+
+    F0 --> F2
+    F1 --> F2
+    F2 --> F3
